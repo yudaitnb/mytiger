@@ -1,0 +1,4 @@
+(executable
+ (public_name mytiger)
+ (name main)
+ (libraries core))
