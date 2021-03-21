@@ -1,4 +1,9 @@
 (executable
  (public_name mytiger)
  (name main)
- (libraries core))
+ (libraries core)
+)
+
+(env
+ (dev
+  (flags (:standard -warn-error -a))))

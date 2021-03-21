@@ -1,23 +1,70 @@
 %{
-open Ast
+open Exp
 %}
 
+%token WHILE
+%token FOR
+%token TO
+%token BREAK
+%token LET
+%token IN
+%token END
+%token FUNCTION
+%token VAR
+%token TYPE
+%token ARRAY
+%token IF
+%token THEN
+%token ELSE
+%token DO
+%token OF
+%token NIL
+
+%token COMMA
+%token COLON
+%token SEMICOLON
 %token LPAREN
 %token RPAREN
-%token EOF
-%token <int> INT
+%token LBRACKET
+%token RBRACKET
+%token LBRACE
+%token RBRACE
+%token DOT
+
 %token PLUS
+%token MINUS
+%token TIMES
+%token DIV
 
-%left PLUS
+%token EQ
+%token NEQ
+%token LT
+%token LTE
+%token GT
+%token GTE
+%token AND
+%token OR
+%token ASSIGN
+%token EOF
 
-%start <Ast.expr> prog
+// %token <string> ID
+%token <int> INT
+%token <string> STR
+
+%left PLUS MINUS
+%left TIMES DIV
+
+%start <exp> prog
 
 %%
 
 prog:
-  | e = expr EOF { e }
+  | e = exp EOF { e }
 
-expr:
-  | LPAREN; e = expr; RPAREN { e }
-  | i = INT { Int i }
-  | e1 = expr; PLUS; e2 = expr { Plus (e1, e2) }
+exp:
+  | LPAREN exp RPAREN { $2 }
+  | INT { Int $1 }
+  | exp PLUS exp { Add ($1, $3) }
+  | exp MINUS exp { Sub ($1, $3) }
+  | exp TIMES exp { Mul ($1, $3) }
+  | exp DIV exp { Div ($1, $3) }
