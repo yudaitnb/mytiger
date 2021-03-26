@@ -1,19 +1,8 @@
 open Core
 open Printf
+open Util
 
-let print_error_position (lexbuf : Lexing.lexbuf) =
-  let pos = lexbuf.lex_curr_p in
-  sprintf "Line:%d Position:%d" pos.pos_lnum (pos.pos_cnum - pos.pos_bol)
-
-let parse_program lexbuf =
-  try Ok (Parser.prog Lexer.tokenize lexbuf) with
-  | Lexer.SyntaxError msg ->
-      let error_msg = sprintf "%s: %s@." (print_error_position lexbuf) msg in
-      Error (error_msg)
-  | Parser.Error ->
-      let error_msg = sprintf "%s: parsing error" (print_error_position lexbuf) in
-      Error (error_msg)
-
+(* 
 let ex1 = "./mytiger/examples/ex1"
 
 let parse_file path = 
@@ -29,12 +18,12 @@ let parse_file path =
   with e ->                      (* 期待しない例外が起こったとき *)
     close_in_noerr ic;           (* 緊急にチャネルを閉じる *)
     raise e                      (* エラー終了: ファイルは閉じられるが
-                                    チャネルはフラッシュされない *)
+                                    チャネルはフラッシュされない *) *)
 
 let () =
   let input = Lexing.from_channel stdin in
-  (* let expr = Parser.prog Lexer.tokenize input in
-  (* printf "result: %s\n" (Lexer.show_token (Lexer.tokenize input)) *)
+  (* let expr = Parser.prog Lexer.token input in
+  (* printf "result: %s\n" (Lexer.show_token (Lexer.token input)) *)
   (* printf "   AST: %s\n" (Exp.show_exp expr) *)
   print_endline (sprintf "   AST: %s\nresult: %d\n" (Exp.show_exp expr) (Evaluator.eval expr)) *)
   match parse_program input with
