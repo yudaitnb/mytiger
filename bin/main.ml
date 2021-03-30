@@ -13,7 +13,7 @@ let parse_file path =
     flush stdout;                (* ここで実際に対象デバイスに書き込む *)
     match parse_program (Lexing.from_string line) with
     | Error msg -> print_endline msg
-    | Ok res    -> print_endline (sprintf "AST: %s" (Exp.show_exp res));
+    | Ok res    -> print_endline (sprintf "AST: %s" (Ast.show_exp res));
     close_in ic                  (* 入力チャネルを閉じる *)
   with e ->                      (* 期待しない例外が起こったとき *)
     close_in_noerr ic;           (* 緊急にチャネルを閉じる *)
@@ -24,8 +24,9 @@ let () =
   let input = Lexing.from_channel stdin in
   (* let expr = Parser.prog Lexer.token input in
   (* printf "result: %s\n" (Lexer.show_token (Lexer.token input)) *)
-  (* printf "   AST: %s\n" (Exp.show_exp expr) *)
-  print_endline (sprintf "   AST: %s\nresult: %d\n" (Exp.show_exp expr) (Evaluator.eval expr)) *)
+  (* printf "   AST: %s\n" (Ast.show_exp expr) *)
+  print_endline (sprintf "   AST: %s\nresult: %d\n" (Ast.show_exp expr) (Evaluator.eval expr)) *)
   match parse_program input with
   | Error msg -> print_endline msg
-  | Ok res    -> printf "   AST: %s\n" (Exp.show_exp res)
+  | Ok res    -> printf "   AST: \n%s\n" (Ast.show_node Ast.pp_exp res)
+    (* printf "   AST: \n%s\n" (Ast.show_exp res.ast) *)

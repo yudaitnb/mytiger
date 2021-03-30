@@ -6,16 +6,6 @@ open Error
 (* string値を受け取って出力する *)
 let printl (str : string) = printf "%s\n" str
 
-(* let show_tokens_from_string str =
-  let lexbuf = Lexing.from_string str in
-  show_tokens_from_lexbuf lexbuf
-
-let print_tokens_from_string (str : string) =
-  try
-    printf "Result: %s\n" (show_token_list (show_tokens_from_string str))
-  with
-  | Lexer.Error error_msg -> printl error_msg *)
-
 (* Lexing bufferを受け取り、Lexing後に生成されるtoken listを生成 *)
 let rec tokens_of buf =
   match token buf with
@@ -46,3 +36,24 @@ let parse_program lexbuf =
   | Parser.Error ->
       let error_msg = gen_error_message lexbuf "Parser" "Unexpected term" in
       Error (error_msg)
+
+(* 
+ * tokens_ofの引数str版
+ * Lexing後に生成されるtoken listを生成
+ *)
+let tokens_of_from_string str =
+  let lexbuf = Lexing.from_string str in
+  tokens_of lexbuf
+
+(* 
+ * parse_programの引数str版
+ *)
+let parse_from_string str =
+  let lexbuf = Lexing.from_string str in
+  Parser.prog Lexer.token lexbuf
+
+(* let print_tokens_from_string (str : string) =
+  try
+    printf "Result: %s\n" (show_list_of_tokens (tokens_of_from_string str))
+  with
+  | Lexer.Error error_msg -> printl error_msg *)

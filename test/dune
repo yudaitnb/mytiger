@@ -1,3 +1,4 @@
 (test
  (libraries ounit2 core)
- (name parser_test))
+ (name parser_test)
+ (flags (:standard -warn-error -a)))
