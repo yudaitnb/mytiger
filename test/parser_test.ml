@@ -2,118 +2,152 @@ open OUnit2
 open Core.Ast
 open Util
 
-
 (* リテラル用のテスト *)
 let parse_tests_for_literals =
   "parse test for literals" >::: [
-    parse_test_exp ("Lit (Int 1)") ( Lit (Int 1) ) ( "1" );
-    parse_test_exp ("Lit (Bool false)") ( Lit (Int 1234) ) ( "1234" );
-    parse_test_exp ("Lit (Bool true)") ( Lit (Bool true) ) ( "true" );
-    parse_test_exp ("Lit (Bool false)") ( Lit (Bool false) ) ( "false" );
-    parse_test_exp ("Lit (String \"aiueo\")") ( Lit (String "hoge") ) ( "\"hoge\"" );
+    parse_test_exp ("Lit (Int 1)")
+      ( "1" )
+      ( Int {value = 1; pos = dummy_pos; } );
+    parse_test_exp ("Lit (Bool false)")
+      ( "1234" )
+      ( Int {value = 1234; pos = dummy_pos; } );
+    parse_test_exp ("Lit (Bool true)")
+      ( "true" )
+      ( Bool {value = true; pos = dummy_pos; } );
+    parse_test_exp ("Lit (Bool false)")
+      ( "false" )
+      ( Bool {value = false; pos = dummy_pos; } );
+    parse_test_exp ("Lit (String \"aiueo\")")
+      ( "\"hoge\"" )
+      ( String {value = "hoge"; pos = dummy_pos; } );
   ]
 
 let parse_tests_for_binops_basics =
   "parse test for binops" >::: [
     parse_test_exp ("1 + 1")
-      ( BinOp {op = Add; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 + 1" );
+      ( "1 + 1" )
+      ( BinOp {op = Add; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 - 1")
-      ( BinOp {op = Sub; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 - 1" );
+      ( "1 - 1" )
+      ( BinOp {op = Sub; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 * 1")
-      ( BinOp {op = Mul; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 * 1" );
+      ( "1 * 1" )
+      ( BinOp {op = Mul; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 / 1")
-      ( BinOp {op = Div; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 / 1" );
+      ( "1 / 1" )
+      ( BinOp {op = Div; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 = 1")
-      ( BinOp {op = Eq; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 = 1" );
+      ( "1 = 1" )
+      ( BinOp {op = Eq; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 <> 1")
-      ( BinOp {op = Neq; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 <> 1" );
+      ( "1 <> 1" )
+      ( BinOp {op = Neq; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 < 1")
-      ( BinOp {op = Lt; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 < 1" );
+      ( "1 < 1" )
+      ( BinOp {op = Lt; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 <= 1")
-      ( BinOp {op = Lte; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 <= 1" );
+      ( "1 <= 1" )
+      ( BinOp {op = Lte; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 > 1")
-      ( BinOp {op = Gt; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 > 1" );
+      ( "1 > 1" )
+      ( BinOp {op = Gt; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("1 >= 1")
-      ( BinOp {op = Gte; e1=node_lit_1; e2=node_lit_1} )
-      ( "1 >= 1" );
+      ( "1 >= 1" )
+      ( BinOp {op = Gte; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ;
     parse_test_exp ("true & true")
-      ( BinOp {op = And; e1=node_lit_true; e2=node_lit_true} )
-      ( "true & true" );
+      ( "true & true" )
+      ( BinOp {op = And; e1=lit_bool_true; e2=lit_bool_true; pos = dummy_pos;} )
+      ;
     parse_test_exp ("true | false")
-      ( BinOp {op = Or; e1=node_lit_true; e2=node_lit_true} )
-      ( "true | true" );
+      ( "true | true" )
+      ( BinOp {op = Or; e1=lit_bool_true; e2=lit_bool_true; pos = dummy_pos;} )
+      ;
   ]
 
   let parse_tests_for_binops_assoc =
     "parse test for binops" >::: [
       parse_test_exp ("1 + 1 * 1")
+        ( "1 + 1 * 1" )
         ( BinOp {
-            op = Add;
-            e1 = node_lit_1;
-            e2 = gen_dummy_node_exp ( BinOp {
-              op = Mul;
-              e1 = node_lit_1;
-              e2 = node_lit_1 }) } )
-        ( "1 + 1 * 1" );
+          op = Add;
+          e1 = lit_int_1;
+          e2 = BinOp {
+            op = Mul;
+            e1 = lit_int_1;
+            e2 = lit_int_1;
+            pos = dummy_pos; };
+          pos = dummy_pos; } );
       parse_test_exp ("1 - 1 / 1")
+        ( "1 - 1 / 1" )
         ( BinOp {
-            op = Sub;
-            e1 = node_lit_1;
-            e2 = gen_dummy_node_exp ( BinOp {
-              op = Div;
-              e1 = node_lit_1;
-              e2 = node_lit_1 }) } )
-        ( "1 - 1 / 1" );
+          op = Sub;
+          e1 = lit_int_1;
+          e2 = BinOp {
+            op = Div;
+            e1 = lit_int_1;
+            e2 = lit_int_1;
+            pos = dummy_pos; };
+          pos = dummy_pos; } );
       parse_test_exp ("(1 + 1) * 1")
+        ( "(1 + 1) * 1" )
         ( BinOp {
           op = Mul;
-          e1 = gen_dummy_node_exp ( SeqExp([
-            gen_dummy_node_exp ( BinOp {
+          e1 = SeqExp([
+            BinOp {
               op = Add;
-              e1 = node_lit_1;
-              e2 = node_lit_1 })
-          ]));
-          e2 = node_lit_1 } )
-        ( "(1 + 1) * 1" );
+              e1 = lit_int_1;
+              e2 = lit_int_1;
+              pos = dummy_pos; }
+          ]);
+          e2 = lit_int_1;
+          pos = dummy_pos; } );
       parse_test_exp ("1 + 1 = 2")
+        ( "1 + 1 = 2" )
         ( BinOp {
           op = Eq;
-          e1 = gen_dummy_node_exp ( BinOp {
+          e1 = BinOp {
             op = Add;
-            e1 = node_lit_1;
-            e2 = node_lit_1 });
-          e2 = node_lit_2 } )
-        ( "1 + 1 = 2" );
+            e1 = lit_int_1;
+            e2 = lit_int_1;
+            pos = dummy_pos; };
+          e2 = lit_int_2;
+          pos = dummy_pos; } );
       parse_test_exp ("1 + 1 > 1")
+        ( "1 + 1 > 1" )
         ( BinOp {
           op = Gt;
-          e1 = gen_dummy_node_exp ( BinOp {
+          e1 = BinOp {
             op = Add;
-            e1 = node_lit_1;
-            e2 = node_lit_1 });
-          e2 = node_lit_1 } )
-        ( "1 + 1 > 1" );
+            e1 = lit_int_1;
+            e2 = lit_int_1;
+            pos = dummy_pos; };
+          e2 = lit_int_1;
+          pos = dummy_pos; } );
       parse_test_exp ("1 + 1 = 2 & true")
+        ( "1 + 1 = 2 & true" )
         ( BinOp {
           op = And;
-          e1 = gen_dummy_node_exp ( BinOp {
+          e1 = BinOp {
             op = Eq;
-            e1 = gen_dummy_node_exp ( BinOp {
+            e1 = BinOp {
               op = Add;
-              e1 = node_lit_1;
-              e2 = node_lit_1 });
-            e2 = node_lit_2 } );
-          e2 = node_lit_true } )
-        ( "1 + 1 = 2 & true" );
+              e1 = lit_int_1;
+              e2 = lit_int_1;
+              pos = dummy_pos; };
+            e2 = lit_int_2;
+            pos = dummy_pos; };
+          e2 = lit_bool_true;
+          pos = dummy_pos; } );
     ]
 
 let () =

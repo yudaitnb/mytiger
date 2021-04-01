@@ -2,15 +2,6 @@
 open Ast
 
 let node_id = ref 1
-let new_node (v) (s : Lexing.position) (e : Lexing.position) =
-  let node = {
-    id = !node_id;
-    loc = (s, e);
-    value = v
-  }
-  in
-    node_id := !node_id + 1;
-    node
 %}
 
 // キーワード
@@ -60,7 +51,7 @@ let new_node (v) (s : Lexing.position) (e : Lexing.position) =
 %nonassoc UMINUS
 
 
-%start <exp Ast.node> prog
+%start <exp> prog
 
 %%
 
@@ -72,97 +63,97 @@ prog:
 exp:
   // リテラル
   | INT
-    { new_node (Lit (Int $1)) $startpos $endpos }
+    { Int    { value = $1; pos = $startpos } }
   | STR
-    { new_node (Lit (String $1)) $startpos $endpos }
+    { String { value = $1; pos = $startpos } }
   | BOOL
-    { new_node (Lit (Bool $1)) $startpos $endpos }
+    { Bool   { value = $1; pos = $startpos } }
 
   // レコード
   // nil
   // type_id {v1=e1, .. ,vn=2n}
   // var.label
   | NIL
-    { new_node Nil $startpos $endpos }
+    { Nil { pos = $startpos } }
   | type_id=ID LBRACE fields=separated_list(COMMA, field) RBRACE
-    { new_node (RecordExp { record_fields=fields; record_type=type_id }) $startpos $endpos }
+    { RecordExp { record_fields=fields; record_type=type_id; pos = $startpos } }
   | arr=exp DOT label=ID
-    { new_node (DotExp { record=arr; label=label }) $startpos $endpos }
+    { DotExp { record=arr; label=label; pos = $startpos } }
 
   // 配列
   // type-id [e1] of e2
   | type_id=ID LBRACKET e1=exp RBRACKET OF e2=exp
-    { new_node (ArrayExp { size=e1; init=e2; array_type=type_id }) $startpos $endpos }
+    { ArrayExp { size=e1; init=e2; array_type=type_id; pos = $startpos } }
 
   // 変数
-  | ID                { new_node (Var $1) $startpos $endpos }
+  | ID                { Var { name = $1; pos = $startpos } }
 
   // 二項演算
-  | exp PLUS exp      { new_node (BinOp { op=Add; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp MINUS exp     { new_node (BinOp { op=Sub; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp ASTERISK exp  { new_node (BinOp { op=Mul; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp SLASH exp     { new_node (BinOp { op=Div; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp EQ exp        { new_node (BinOp { op=Eq;  e1=$1; e2=$3 }) $startpos $endpos }
-  | exp NEQ exp       { new_node (BinOp { op=Neq; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp GT exp        { new_node (BinOp { op=Gt;  e1=$1; e2=$3 }) $startpos $endpos }
-  | exp GTE exp       { new_node (BinOp { op=Gte; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp LT exp        { new_node (BinOp { op=Lt;  e1=$1; e2=$3 }) $startpos $endpos }
-  | exp LTE exp       { new_node (BinOp { op=Lte; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp AND exp       { new_node (BinOp { op=And; e1=$1; e2=$3 }) $startpos $endpos }
-  | exp OR exp        { new_node (BinOp { op=Or;  e1=$1; e2=$3 }) $startpos $endpos }
+  | exp PLUS exp      { BinOp { op=Add; e1=$1; e2=$3; pos = $startpos } }
+  | exp MINUS exp     { BinOp { op=Sub; e1=$1; e2=$3; pos = $startpos } }
+  | exp ASTERISK exp  { BinOp { op=Mul; e1=$1; e2=$3; pos = $startpos } }
+  | exp SLASH exp     { BinOp { op=Div; e1=$1; e2=$3; pos = $startpos } }
+  | exp EQ exp        { BinOp { op=Eq;  e1=$1; e2=$3; pos = $startpos } }
+  | exp NEQ exp       { BinOp { op=Neq; e1=$1; e2=$3; pos = $startpos } }
+  | exp GT exp        { BinOp { op=Gt;  e1=$1; e2=$3; pos = $startpos } }
+  | exp GTE exp       { BinOp { op=Gte; e1=$1; e2=$3; pos = $startpos } }
+  | exp LT exp        { BinOp { op=Lt;  e1=$1; e2=$3; pos = $startpos } }
+  | exp LTE exp       { BinOp { op=Lte; e1=$1; e2=$3; pos = $startpos } }
+  | exp AND exp       { BinOp { op=And; e1=$1; e2=$3; pos = $startpos } }
+  | exp OR exp        { BinOp { op=Or;  e1=$1; e2=$3; pos = $startpos } }
 
   // 単項マイナス
   | MINUS e = exp %prec UMINUS
-    { new_node (UnOp { op=Minus; e=e }) $startpos $endpos }
+    { UnOp { op=Minus; e=e; pos = $startpos } }
 
   // 条件式
   // if e1 then e2 else e3
   // if e1 then e2
   | IF e1=exp THEN e2=exp             
-    { new_node (IfExp { cond=e1; th=e2; el=None }) $startpos $endpos }
+    { IfExp { cond=e1; th=e2; el=None; pos = $startpos } }
   | IF e1=exp THEN e2=exp ELSE e3=exp 
-    { new_node (IfExp { cond=e1; th=e2; el=Some(e3) }) $startpos $endpos }
+    { IfExp { cond=e1; th=e2; el=Some(e3); pos = $startpos } }
 
   // ループ
   // while e1 do e2
   // for id := e1 to e2 do e3
   // break
   | WHILE cond=exp DO body=exp
-    { new_node (WhileExp { cond=cond; body=body }) $startpos $endpos }
+    { WhileExp { cond=cond; body=body; pos = $startpos } }
   | FOR id=ID ASSIGN e1=exp TO e2=exp DO e3=exp
-    { new_node (ForExp { var=id; lo=e1; hi=e2; body=e3 }) $startpos $endpos }
+    { ForExp { var=id; lo=e1; hi=e2; body=e3; pos = $startpos } }
   | BREAK
-    { new_node (BreakExp) $startpos $endpos }
+    { BreakExp { pos = $startpos } }
 
   // let式
   // let DECS in EXP end
   | LET decs=list(dec) IN exp=exp END
-    { new_node (LetExp { decs=decs; body=exp }) $startpos $endpos }
+    { LetExp { decs=decs; body=exp; pos = $startpos } }
   
   // 列化
   // (e1; e2; ... ; en)
   | LPAREN es=separated_list(SEMICOLON, exp) RPAREN
-    { new_node (SeqExp es) $startpos $endpos }
+    { SeqExp es }
 
 // Declarations
 dec :
   | separated_nonempty_list(AND, tydec)
-    { new_node (TyDec $1) $startpos $endpos }
+    { TypeDec $1 }
   | separated_nonempty_list(AND, fundec)
-    { new_node (FunDec $1) $startpos $endpos }
+    { FunDec $1 }
   | vardec
-    { new_node ($1) $startpos $endpos }
+    { $1 }
 
 // type ID = TY
 tydec:
   | TYPE x=ID EQ user_ty=ty
-    { { tyname=x; ty=user_ty } }
+    { { tyname=x; ty=user_ty; pos = $startpos } }
 
 // var x:TY := EXP
 // var x := EXP
 vardec:
   | VAR x=ID var_ty=type_constraint ASSIGN e1=exp
-    { VarDec { var_name=x; var_type=var_ty; init_val=e1 } }
+    { VarDec { var_name = x; var_type = var_ty; init_val = e1; pos = $startpos } }
 
 // :TY
 type_constraint:
@@ -172,7 +163,7 @@ type_constraint:
 // function f (PARAMS) : TY = EXP
 fundec:
   | FUNCTION name=ID LPAREN params=separated_list(COMMA, tyfield) RPAREN res_ty=type_constraint EQ body=exp
-    { { name=name; params=params; result_type=res_ty; body=body } }
+    { { name=name; params=params; result_type=res_ty; body=body; pos = $startpos } }
 
 field :
   | x=ID EQ e=exp

@@ -28,5 +28,5 @@ let () =
   print_endline (sprintf "   AST: %s\nresult: %d\n" (Ast.show_exp expr) (Evaluator.eval expr)) *)
   match parse_program input with
   | Error msg -> print_endline msg
-  | Ok res    -> printf "   AST: \n%s\n" (Ast.show_node Ast.pp_exp res)
+  | Ok res    -> printf "   AST: \n%s\n" (Ast.show_exp res)
     (* printf "   AST: \n%s\n" (Ast.show_exp res.ast) *)
