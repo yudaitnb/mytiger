@@ -14,11 +14,12 @@ let lit_bool_true = Bool {value = true; pos = dummy_pos }
 let lit_bool_false = Bool {value = false; pos = dummy_pos }
 
 (* 
- * expノードの為のテスト
+ * expの為のparseテスト
  * name     : テスト名
  * expected : 期待されるパース結果(exp型の値)
  * input    : プログラム(str型の値)
  *)
+
 let parse_test_exp name input expected =
   name >::
   (fun _ -> assert_equal ~printer:(show_exp) ~cmp:(equal_exp)

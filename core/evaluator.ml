@@ -1,67 +1,94 @@
-(* open Ast
-open Hashtbl
+open Ast
+(* open Hashtbl
+open Stack *)
 
-type value =
-  | VInt  of int
-  | VBool of bool
-  | VString of string
-  | VUnit
-  | VRecord of value list
-  | VArray  of value list
+type value = [
+  | `VInt  of int
+  | `VBool of bool
+  | `VString of string
+  (* | `VUnit *)
+  | `VRecord of value list
+  | `VArray  of value list ]
+  [@@ deriving show, eq]
 
-let table_evaluator = Hashtbl.create 100
+let get_value value = 
+  match value with
+  | `VInt  i -> i
+  | `VBool b -> b
+  | `VString s -> s
+  (* | `VUnit  -> unit *)
+  | `VRecord values -> values
+  | `VArray  values -> values
 
-let makenode id loc value = {id = id; loc = loc; value = value}
+(* let table_evaluator = Hashtbl.create 100
 
-let rec eval nexp = 
-  let id = nexp.id in
-  let child_exp = nexp.value in
-  let c_loc = nexp.loc in
-  let pos_s = (fst nexp.loc).pos_cnum in
-  let pos_e = (snd nexp.loc).pos_cnum in
-  match child_exp with
-  | Lit v -> makenode id c_loc (Lit v)
-  (* | BinOp { op : binop; e1 : exp node; e2 : exp node } -> (
-    let res_e1 = (eval e1).value in
-    let res_e2 = (eval e2).value in
+let env = Stack.create *)
+
+let rec eval exp stack env = 
+  match exp with
+  | Int v    -> `VInt v.value
+  | Bool v   -> `VBool v.value
+  | String v -> `VString v.value
+  (* | BinOp { op : binop; e1 : exp; e2 : exp; _; } -> (
+    let v1 = eval e1 stack env in
+    let v2 = eval e2 stack env in
     match op with
-    | Add -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Sub -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Mul -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Div -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Eq  -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Neq -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Lt  -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Lte -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Gt  -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Gte -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | And -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-    | Or  -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | UnOp  { op : unop; e : exp node }
-    -> 
-  | IfExp of { cond : exp node; th : exp node ; el : exp node option }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
+    | Add ->  VInt (v1  + v2)
+    | Sub ->  VInt (v1  - v2)
+    | Mul ->  VInt (v1  * v2)
+    | Div ->  VInt (v1  / v2)
+    | Eq  ->  VInt (v1  = v2)
+    | Neq -> VBool (v1 <> v2)
+    | Lt  -> VBool (v1  < v2)
+    | Lte -> VBool (v1 <= v2)
+    | Gt  -> VBool (v1  > v2)
+    | Gte -> VBool (v1 >= v2)
+    | And -> VBool (v1 && v2)
+    | Or  -> VBool (v1 || v2) ) *)
+  | UnOp { op : unop; e : exp; _; } -> (
+    let v = eval e stack env in
+    match op with
+    | Minus -> (
+      match v with
+      | `VInt i -> `VInt ( -i )
+      | _       -> failwith "not int" )
+    | Not   -> (
+      match v with
+      | `VBool b -> `VBool ( not b )
+      | _        -> failwith "not bool" ) 
+    )
+  | IfExp { cond : exp; th : exp ; el : exp option; _; } -> (
+    let res_cond = eval cond stack env in
+    if equal_value res_cond (`VBool true)
+      then eval th stack env
+      else ( match el with
+        | Some x -> eval x stack env
+        | None   -> failwith "a"
+    ) )
   (* ループ *)
-  | WhileExp  of { cond : exp node; body : exp node }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | ForExp    of { var : name; lo : exp node; hi : exp node; body : exp node }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | BreakExp
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
+  (* | WhileExp  { cond : exp; body : exp; pos : position; } -> (
+    let res_cond = (eval cond stack env).value in
+    if res_cond
+      then VInt 1
+      else VInt 1 )
+  | ForExp    { var : name; lo : exp; hi : exp; body : exp; pos : position; }
+    -> VInt 1
+  | BreakExp  { pos : position; }
+    -> VInt 1
   (* レコード *)
   | Nil
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | RecordExp of { record_fields : (name * exp node) list; record_type : name }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | DotExp    of { record : exp node; label : name }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
+    -> VInt 1
+  | RecordExp { record_fields : (name * exp) list; record_type : name; pos : position; }
+    -> VInt 1
+  | DotExp    { record : exp; label : name; pos : position; }
+    -> VInt 1
   (* 配列 *)
-  | ArrayExp of { size : exp node; init : exp node; array_type : name }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
+  | ArrayExp { size : exp; init : exp; array_type : name; pos : position; }
+    -> VInt 1
   (* 列化 *)
-  | SeqExp of exp node list
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | LetExp { decs : (dec node) list; body : exp node }
-    -> makenode id c_loc (makenode id c_loc (Lit (Int 1))) *)
-  | EOF -> makenode id c_loc (makenode id c_loc (Lit (Int 1)))
-  | _   -> makenode id c_loc (makenode id c_loc (Lit (Int 1))) *)
+  | SeqExp exps
+    -> VInt 1
+  | LetExp { decs : (dec node) list; body : exp; pos : position; }
+    -> VInt 1 *)
+  | EOF -> `VInt 1
+  | _   -> `VInt 1
