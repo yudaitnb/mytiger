@@ -26,9 +26,9 @@ let env = Stack.create *)
 
 let rec eval exp stack env = 
   match exp with
-  | Int v    -> `VInt v.value
-  | Bool v   -> `VBool v.value
-  | String v -> `VString v.value
+  | IntExp v    -> `VInt v.value
+  | BoolExp v   -> `VBool v.value
+  | StringExp v -> `VString v.value
   (* | BinOp { op : binop; e1 : exp; e2 : exp; _; } -> (
     let v1 = eval e1 stack env in
     let v2 = eval e2 stack env in
@@ -45,7 +45,7 @@ let rec eval exp stack env =
     | Gte -> VBool (v1 >= v2)
     | And -> VBool (v1 && v2)
     | Or  -> VBool (v1 || v2) ) *)
-  | UnOp { op : unop; e : exp; _; } -> (
+  | UnOpExp { op : unop; e : exp; _; } -> (
     let v = eval e stack env in
     match op with
     | Minus -> (

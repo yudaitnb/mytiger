@@ -91,10 +91,3 @@ let str_replace c1 c2 str =
     Bytes.set s i c2;
     Bytes.to_string s
   with Not_found -> str
-
-let box_node x =
-  Box.frame (Box.line (str_replace ':' '\n' x))
-
-let rec box_of_tree = function
-  | Tree (x,[]) -> box_node x
-  | Tree (x,ts) -> Box.connect (box_node x) (List.map box_of_tree ts)

@@ -8,10 +8,10 @@ let dummy_pos = (
   (* , { pos_fname = ""; pos_lnum = 1; pos_bol = 0; pos_cnum = 0 } *)
 )
 
-let lit_int_1 = Int {value = 1; pos = dummy_pos }
-let lit_int_2 = Int {value = 2; pos = dummy_pos }
-let lit_bool_true = Bool {value = true; pos = dummy_pos }
-let lit_bool_false = Bool {value = false; pos = dummy_pos }
+let lit_int_1 = IntExp {value = 1; pos = dummy_pos }
+let lit_int_2 = IntExp {value = 2; pos = dummy_pos }
+let lit_bool_true = BoolExp {value = true; pos = dummy_pos }
+let lit_bool_false = BoolExp {value = false; pos = dummy_pos }
 
 (* 
  * expの為のparseテスト

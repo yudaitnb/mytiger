@@ -63,18 +63,18 @@ prog:
 exp:
   // リテラル
   | INT
-    { Int    { value = $1; pos = $startpos } }
+    { IntExp    { value = $1; pos = $startpos } }
   | STR
-    { String { value = $1; pos = $startpos } }
+    { StringExp { value = $1; pos = $startpos } }
   | BOOL
-    { Bool   { value = $1; pos = $startpos } }
+    { BoolExp   { value = $1; pos = $startpos } }
 
   // レコード
   // nil
   // type_id {v1=e1, .. ,vn=2n}
   // var.label
   | NIL
-    { Nil { pos = $startpos } }
+    { NilExp { pos = $startpos } }
   | type_id=ID LBRACE fields=separated_list(COMMA, field) RBRACE
     { RecordExp { record_fields=fields; record_type=type_id; pos = $startpos } }
   | arr=exp DOT label=ID
@@ -86,25 +86,25 @@ exp:
     { ArrayExp { size=e1; init=e2; array_type=type_id; pos = $startpos } }
 
   // 変数
-  | ID                { Var { name = $1; pos = $startpos } }
+  | ID                { VarExp { name = $1; pos = $startpos } }
 
   // 二項演算
-  | exp PLUS exp      { BinOp { op=Add; e1=$1; e2=$3; pos = $startpos } }
-  | exp MINUS exp     { BinOp { op=Sub; e1=$1; e2=$3; pos = $startpos } }
-  | exp ASTERISK exp  { BinOp { op=Mul; e1=$1; e2=$3; pos = $startpos } }
-  | exp SLASH exp     { BinOp { op=Div; e1=$1; e2=$3; pos = $startpos } }
-  | exp EQ exp        { BinOp { op=Eq;  e1=$1; e2=$3; pos = $startpos } }
-  | exp NEQ exp       { BinOp { op=Neq; e1=$1; e2=$3; pos = $startpos } }
-  | exp GT exp        { BinOp { op=Gt;  e1=$1; e2=$3; pos = $startpos } }
-  | exp GTE exp       { BinOp { op=Gte; e1=$1; e2=$3; pos = $startpos } }
-  | exp LT exp        { BinOp { op=Lt;  e1=$1; e2=$3; pos = $startpos } }
-  | exp LTE exp       { BinOp { op=Lte; e1=$1; e2=$3; pos = $startpos } }
-  | exp AND exp       { BinOp { op=And; e1=$1; e2=$3; pos = $startpos } }
-  | exp OR exp        { BinOp { op=Or;  e1=$1; e2=$3; pos = $startpos } }
+  | exp PLUS exp      { BinOpExp { op=Add; e1=$1; e2=$3; pos = $startpos } }
+  | exp MINUS exp     { BinOpExp { op=Sub; e1=$1; e2=$3; pos = $startpos } }
+  | exp ASTERISK exp  { BinOpExp { op=Mul; e1=$1; e2=$3; pos = $startpos } }
+  | exp SLASH exp     { BinOpExp { op=Div; e1=$1; e2=$3; pos = $startpos } }
+  | exp EQ exp        { BinOpExp { op=Eq;  e1=$1; e2=$3; pos = $startpos } }
+  | exp NEQ exp       { BinOpExp { op=Neq; e1=$1; e2=$3; pos = $startpos } }
+  | exp GT exp        { BinOpExp { op=Gt;  e1=$1; e2=$3; pos = $startpos } }
+  | exp GTE exp       { BinOpExp { op=Gte; e1=$1; e2=$3; pos = $startpos } }
+  | exp LT exp        { BinOpExp { op=Lt;  e1=$1; e2=$3; pos = $startpos } }
+  | exp LTE exp       { BinOpExp { op=Lte; e1=$1; e2=$3; pos = $startpos } }
+  | exp AND exp       { BinOpExp { op=And; e1=$1; e2=$3; pos = $startpos } }
+  | exp OR exp        { BinOpExp { op=Or;  e1=$1; e2=$3; pos = $startpos } }
 
   // 単項マイナス
   | MINUS e = exp %prec UMINUS
-    { UnOp { op=Minus; e=e; pos = $startpos } }
+    { UnOpExp { op=Minus; e=e; pos = $startpos } }
 
   // 条件式
   // if e1 then e2 else e3

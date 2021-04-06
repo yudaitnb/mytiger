@@ -74,7 +74,6 @@ let empty = Table.empty
 
 (* 新しい束縛を追加（古い表を更新せず、新しい表を生成する *)
 let enter = Table.add
-(* let look = Table.find *)
 
 (* 表tableの中で記号keyの束縛bを見つけ、Some(b)を返す(keyの束縛が存在しないならNone) *)
 let look key table =
