@@ -5,7 +5,7 @@ module T = Types
 
 
 let type_mismatch loc expected found =
-  Error.error loc "type mismatch: expected %s, found %s" (T.string_of_ty expected) (T.string_of_ty found)
+  Error.error loc "type mismatch: expected %s, but found %s" (T.string_of_ty expected) (T.string_of_ty found)
 
 let undefined loc kind id =
   Error.error loc "undefined %s %s" kind (S.name id)
@@ -16,143 +16,182 @@ let misdefined loc kind id =
 let cannot_be_nil loc id =
   Error.error loc "cannot initialize untyped variable %s with nil" (S.name id)
 
-let loc = Location.loc
+let break_is_not_in_loop loc =
+  Error.error loc "breal exp isn't in loop exp"
 
 let coerceable = T.coerceable
 
-let look env kind id pos =
+let look env kind id loc =
   match S.look id env with
   | Some x -> x
-  | None -> undefined pos kind id
+  | None -> undefined loc kind id
 
-let tylook tenv id pos =
-  look tenv "type" id pos
+let tylook tenv id loc =
+  look tenv "type" id loc
 
-let funlook venv id pos =
-  look venv "function" id pos
+let funlook venv id loc =
+  look venv "function" id loc
 
-let varlook venv id pos =
-  look venv "variable" id pos
+let varlook venv id loc =
+  look venv "variable" id loc
 
-let coerce ty1 ty2 pos =
+let coerce ty1 ty2 loc =
   if not (coerceable ty1 ty2) then
-    type_mismatch pos ty2 ty1
+    type_mismatch loc ty2 ty1
 
-let check_int ty pos = coerce ty T.INT pos
+let check_int ty loc = coerce ty T.INT loc
 
-let check_unit ty pos = coerce ty T.UNIT pos
+let check_unit ty loc = coerce ty T.UNIT loc
 
-let rec check_exp ((tenv,venv,in_loop) as env) (pos,exp) =
+module Translate = struct
+  type exp = unit 
+end
+
+type expty = { exp: Translate.exp; ty: Types.ty }
+
+(* Ast.Expから(Translate.Exp, Types.ty)への変換 *)
+let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
   match exp with
-  | A.NilExp _ -> T.NIL
+  | A.IntExp _    -> T.INT
+  | A.BoolExp _   -> T.INT
+  | A.StringExp _ -> T.STRING
+  | NilExp _      -> T.NIL
 
-  | A.IntExp _ -> T.INT
-  (* | A.ArrayExp (typeid, ((lsize,_) as size), elem) ->
-     let tsize = check_exp env size in
-     check_int tsize lsize;
-     let telem = check_exp env elem in
-     begin match T.actual_ty (tylook tenv typeid pos) with
-     | T.ARRAY (te,_) as t ->
-        coerce telem te (loc elem);
-        t
-     | _ -> misdefined pos "array type" typeid
-     end *)
+  (* 二項演算 *)
+  | A.BinOpExp { op; e1; e2; loc; } -> (
+    let tye1 = check_exp venv tenv inloop e1 in
+    let tye2 = check_exp venv tenv inloop e2 in
+    match op with
+    (* 算術二項演算 *)
+    | A.Add -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Sub -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Mul -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Div -> check_int tye1 loc; check_int tye2 loc; T.INT
 
-  (* | A.OpExp (op,l,r) ->
-    let tl = check_exp env l in
-    let tr = check_exp env r in
-    begin match op with
-    | A.PlusOp | A.MinusOp | A.TimesOp | A.DivideOp ->
-       check_int tl (loc l);
-       check_int tr (loc r);
-       T.INT
-    (* TODO: remaining binary operators *)
-    | _ ->
-       Error.fatal "unimplemented"
-    end *)
+    (* 算術比較演算 *)
+    | A.Eq  -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Neq -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Lt  -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Lte -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Gt  -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Gte -> check_int tye1 loc; check_int tye2 loc; T.INT
 
-  (* | A.VarExp var -> check_var env var *)
+    (* 論理二項演算 *)
+    | A.And -> check_int tye1 loc; check_int tye2 loc; T.INT
+    | A.Or  -> check_int tye1 loc; check_int tye2 loc; T.INT
+  )
 
-  (* | A.SeqExp exps ->
-     let rec check_seq = function
-       | []        -> T.UNIT
-       | [exp]     -> check_exp env exp
-       | exp::rest -> ignore (check_exp env exp); check_seq rest
-     in
-     check_seq exps *)
+  (* 
+   * if-exp
+   * - else節が存在するなら、二つの返り値型tythとtyelは同じ型
+   *)
+  | IfExp { cond; th; el; loc } -> (
+    let tycond = check_exp venv tenv inloop cond in
+    let tyth   = check_exp venv tenv inloop th in
+    check_int tycond loc; (
+    match el with
+    | None -> tyth
+    | Some el' -> 
+      let tyel = check_exp venv tenv inloop el' in 
+      coerce tyth tyel loc; tyth
+    )
+  )
 
-  (* | A.LetExp (decs,body) ->
-     let env' = List.fold_left check_dec env decs in
-     check_exp env' body *)
+  (* 
+   * While式 
+   * - bodyは値を返さない
+   *)
+  | WhileExp { cond; body; loc } ->
+    let tycond = check_exp venv tenv false cond in
+    let tybody = check_exp venv tenv true body in
+    check_int tycond loc; check_unit tybody loc; T.UNIT
 
-  (* TODO: remaining expression *)
+  (*
+   * For式
+   * - bodyは値を返さない
+   * - bodyを評価中のみ値環境がvarで拡張される(ex_venv)
+   *)
+  | ForExp { var; lo; hi; body; loc } ->
+    let ex_venv = 
+      S.enter 
+        (S.symbol var) 
+        (E.VarEntry { ty = T.INT }) 
+        venv
+    in
+    let tylo   = check_exp venv tenv inloop lo in
+    let tyhi   = check_exp venv tenv inloop hi in
+    let tybody = check_exp ex_venv tenv true body in
+    check_int tylo loc; check_int tyhi loc; check_unit tybody loc; T.UNIT
 
-  | _ ->
-     Error.fatal "unimplemented"
+  (* 
+   * Break文
+   * - breakは値を返さない
+   * - breakはforループかwhileループの中にのみ出現できる
+   *)
+  | BreakExp { loc } ->
+    if (not inloop)
+      then break_is_not_in_loop loc
+      else T.UNIT
 
-(* and check_var ((tenv,venv,in_loop) as env) (pos,var) =
-  match var with
-  | A.SimpleVar id ->
-     begin match varlook venv id pos with
-     | T.FUNCTION _ -> misdefined pos "variable" id
-     | t -> t
-     end *)
+  (*
+   * レコード式
+   * let
+   *   type hoge = { a:int, b:int }
+   *   var x = hoge{ a=1, b=1 }
+   * in ...
+   * 以下の2つの型が等しい
+   * - 各フィールドの型
+   * - 型環境中に存在するレコード型T.RECORD {(S.symbol * ty) list * unique}の対応するフィールドの要素型ty
+   *)
+  | RecordExp { record_name; record_fields; loc; } -> (
+    let t_rec_fields = 
+      List.map
+        (fun (_, field) -> check_exp venv tenv inloop field)
+        (record_fields)
+    in
+    begin match T.actual_ty (tylook tenv (S.symbol record_name) loc) with
+    | T.RECORD (lst, _) as t ->
+      (* (symbol * ty) list -> ty list *)
+      let rec maketylist tpllst =
+        match tpllst with
+        | [] -> []
+        | (_,ty)::rst -> ty :: (maketylist rst)
+      in
+      (List.iter2
+        (fun a b -> coerce a b loc)
+        (t_rec_fields)
+        (maketylist lst));
+       t
+    | _ -> misdefined loc "array type" (S.symbol record_name)
+    end
+  )
 
-  (* TODO: remaining variables  *)
+  (* レコード取り出し *)
+  | DotExp { record; label; loc; }
+    -> Error.fatal "unimplemented"
 
-  | _ ->
-     Error.fatal "unimplemented"
+  (*
+   * 配列
+   * - 要素型telemと型環境中に存在する配列型T.Array(te,_)の要素型teが等しい
+   *)
+  | ArrayExp { array_name; size; init; loc; } ->
+    let tsize = check_exp venv tenv inloop size in
+    check_int tsize loc;
+    let telem = check_exp venv tenv inloop init in
+    begin match T.actual_ty (tylook tenv (S.symbol array_name) loc) with
+    | T.ARRAY (te,_) as t ->
+       coerce telem te loc;
+       t
+    | _ -> misdefined loc "array type" (S.symbol array_name)
+    end
 
-and check_dec ((tenv,venv,in_loop) as env) (pos,dec) =
-  match dec with
-  (* | A.VarDec (name,type_opt,init) ->
-     let tinit = check_exp env init in
-     let tvar =
-       match type_opt with
-       | Some (pos,tname) -> let t = tylook tenv tname pos in
-                             coerce tinit t (loc init);
-                             t
-       | None -> if coerceable tinit T.NIL then
-                   cannot_be_nil (loc init) name;
-                 tinit
-     in
-     let venv' = S.enter name tvar venv in
-     (tenv,venv',in_loop)
+  (* 式列 *)
+  | SeqExp explist
+    -> Error.fatal "unimplemented"
 
-  | A.MutualTypeDecs tdecs ->
-     (* first pass: add new type names to environment *)
-     let new_tenv =
-       List.fold_left
-         (fun tenv (_pos, (tname, _tcons)) ->
-           S.enter tname (T.NAME (tname, ref None)) tenv)
-         tenv
-         tdecs
-     in
-     let new_env = (new_tenv, venv, in_loop) in
-     (* second pass: check type definition *)
-     List.iter
-       (fun (_pos, (tname, tcons)) ->
-         let ty = check_ty new_env tcons in
-         match S.look tname new_tenv with
-         | Some (T.NAME (_, cell)) -> cell := Some ty
-         | _ -> Error.fatal "bug!")
-       tdecs;
-     new_env *)
-
-  (* TODO: remaining declarations  *)
-
-  | _ ->
-     Error.fatal "unimplemented"
-
-and check_ty ((tenv,venv,in_loop) as env) (pos,ty) =
-   match ty with
-  (* | A.NameTy t -> tylook tenv t pos *)
-
-  (* TODO: remaining type constructors *)
-
-  | _ ->
-     Error.fatal "unimplemented"
-
-
-let type_check program =
-  check_exp (E.base_tenv, E.base_venv, false) program
+  (* Let式 *)
+  | LetExp { decs; body; loc; }
+    -> Error.fatal "unimplemented"
+  
+  | EOF -> T.UNIT
+  | _ -> Error.fatal "unimplemented"

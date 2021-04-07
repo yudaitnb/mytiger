@@ -3,15 +3,12 @@ open Core.Ast
 open Core.Util
 
 let dummy_id = 0
-let dummy_pos = (
-  { pos_fname = ""; pos_lnum = 1; pos_bol = 0; pos_cnum = 0 }
-  (* , { pos_fname = ""; pos_lnum = 1; pos_bol = 0; pos_cnum = 0 } *)
-)
+let dummy_loc = Core.Location.dummy_loc
 
-let lit_int_1 = IntExp {value = 1; pos = dummy_pos }
-let lit_int_2 = IntExp {value = 2; pos = dummy_pos }
-let lit_bool_true = BoolExp {value = true; pos = dummy_pos }
-let lit_bool_false = BoolExp {value = false; pos = dummy_pos }
+let lit_int_1 = IntExp {value = 1; loc = dummy_loc }
+let lit_int_2 = IntExp {value = 2; loc = dummy_loc }
+let lit_bool_true = BoolExp {value = true; loc = dummy_loc }
+let lit_bool_false = BoolExp {value = false; loc = dummy_loc }
 
 (* 
  * expの為のparseテスト

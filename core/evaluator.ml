@@ -45,18 +45,6 @@ let rec eval exp stack env =
     | Gte -> VBool (v1 >= v2)
     | And -> VBool (v1 && v2)
     | Or  -> VBool (v1 || v2) ) *)
-  | UnOpExp { op : unop; e : exp; _; } -> (
-    let v = eval e stack env in
-    match op with
-    | Minus -> (
-      match v with
-      | `VInt i -> `VInt ( -i )
-      | _       -> failwith "not int" )
-    | Not   -> (
-      match v with
-      | `VBool b -> `VBool ( not b )
-      | _        -> failwith "not bool" ) 
-    )
   | IfExp { cond : exp; th : exp ; el : exp option; _; } -> (
     let res_cond = eval cond stack env in
     if equal_value res_cond (`VBool true)

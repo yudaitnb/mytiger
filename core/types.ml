@@ -19,7 +19,7 @@
  * フィールドが完全に一致していても新しいレコード型を生成する
  *)
  type unique = unit ref
-[@@deriving show]
+[@@deriving show, eq]
 
 (* 型識別子 *)
 type ty =
@@ -50,14 +50,14 @@ type ty =
   | NAME of Symbol.symbol * ty option ref
   (* 関数型？ *)
   | FUNCTION of ty list * ty
-[@@deriving show]
+[@@deriving show, eq]
 
 (* NAME型の参照する型を検索する *)
 let rec actual_ty = function
   | NAME (_,{contents=Some t}) -> actual_ty t
   | t                          -> t
 
-(* a,bがvalidな相互再帰型か検査する *)
+(* a, bが等しい型か検査する *)
   let rec coerceable a b =
   match a,b with
   | NAME (_,{contents=Some t}), b                          -> coerceable t b

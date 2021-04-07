@@ -7,70 +7,70 @@ let parse_tests_for_literals =
   "parse test for literals" >::: [
     parse_test_exp ("IntExp (1)")
       ( "1" )
-      ( IntExp {value = 1; pos = dummy_pos; } );
+      ( IntExp {value = 1; loc = dummy_loc; } );
     parse_test_exp ("BoolExp false")
       ( "1234" )
-      ( IntExp {value = 1234; pos = dummy_pos; } );
+      ( IntExp {value = 1234; loc = dummy_loc; } );
     parse_test_exp ("BoolExp true")
       ( "true" )
-      ( BoolExp {value = true; pos = dummy_pos; } );
+      ( BoolExp {value = true; loc = dummy_loc; } );
     parse_test_exp ("BoolExp false")
       ( "false" )
-      ( BoolExp {value = false; pos = dummy_pos; } );
+      ( BoolExp {value = false; loc = dummy_loc; } );
     parse_test_exp ("StringExp (\"aiueo\")")
       ( "\"hoge\"" )
-      ( StringExp {value = "hoge"; pos = dummy_pos; } );
+      ( StringExp {value = "hoge"; loc = dummy_loc; } );
   ]
 
 let parse_tests_for_binops_basics =
   "parse test for binops" >::: [
     parse_test_exp ("1 + 1")
       ( "1 + 1" )
-      ( BinOpExp {op = Add; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Add; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 - 1")
       ( "1 - 1" )
-      ( BinOpExp {op = Sub; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Sub; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 * 1")
       ( "1 * 1" )
-      ( BinOpExp {op = Mul; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Mul; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 / 1")
       ( "1 / 1" )
-      ( BinOpExp {op = Div; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Div; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 = 1")
       ( "1 = 1" )
-      ( BinOpExp {op = Eq; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Eq; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 <> 1")
       ( "1 <> 1" )
-      ( BinOpExp {op = Neq; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Neq; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 < 1")
       ( "1 < 1" )
-      ( BinOpExp {op = Lt; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Lt; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 <= 1")
       ( "1 <= 1" )
-      ( BinOpExp {op = Lte; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Lte; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 > 1")
       ( "1 > 1" )
-      ( BinOpExp {op = Gt; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Gt; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("1 >= 1")
       ( "1 >= 1" )
-      ( BinOpExp {op = Gte; e1=lit_int_1; e2=lit_int_1; pos = dummy_pos;} )
+      ( BinOpExp {op = Gte; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
     parse_test_exp ("true & true")
       ( "true & true" )
-      ( BinOpExp {op = And; e1=lit_bool_true; e2=lit_bool_true; pos = dummy_pos;} )
+      ( BinOpExp {op = And; e1=lit_bool_true; e2=lit_bool_true; loc = dummy_loc;} )
       ;
     parse_test_exp ("true | false")
       ( "true | true" )
-      ( BinOpExp {op = Or; e1=lit_bool_true; e2=lit_bool_true; pos = dummy_pos;} )
+      ( BinOpExp {op = Or; e1=lit_bool_true; e2=lit_bool_true; loc = dummy_loc;} )
       ;
   ]
 
@@ -85,8 +85,8 @@ let parse_tests_for_binops_basics =
             op = Mul;
             e1 = lit_int_1;
             e2 = lit_int_1;
-            pos = dummy_pos; };
-          pos = dummy_pos; } );
+            loc = dummy_loc; };
+          loc = dummy_loc; } );
       parse_test_exp ("1 - 1 / 1")
         ( "1 - 1 / 1" )
         ( BinOpExp {
@@ -96,8 +96,8 @@ let parse_tests_for_binops_basics =
             op = Div;
             e1 = lit_int_1;
             e2 = lit_int_1;
-            pos = dummy_pos; };
-          pos = dummy_pos; } );
+            loc = dummy_loc; };
+          loc = dummy_loc; } );
       parse_test_exp ("(1 + 1) * 1")
         ( "(1 + 1) * 1" )
         ( BinOpExp {
@@ -107,10 +107,10 @@ let parse_tests_for_binops_basics =
               op = Add;
               e1 = lit_int_1;
               e2 = lit_int_1;
-              pos = dummy_pos; }
+              loc = dummy_loc; }
           ]);
           e2 = lit_int_1;
-          pos = dummy_pos; } );
+          loc = dummy_loc; } );
       parse_test_exp ("1 + 1 = 2")
         ( "1 + 1 = 2" )
         ( BinOpExp {
@@ -119,9 +119,9 @@ let parse_tests_for_binops_basics =
             op = Add;
             e1 = lit_int_1;
             e2 = lit_int_1;
-            pos = dummy_pos; };
+            loc = dummy_loc; };
           e2 = lit_int_2;
-          pos = dummy_pos; } );
+          loc = dummy_loc; } );
       parse_test_exp ("1 + 1 > 1")
         ( "1 + 1 > 1" )
         ( BinOpExp {
@@ -130,9 +130,9 @@ let parse_tests_for_binops_basics =
             op = Add;
             e1 = lit_int_1;
             e2 = lit_int_1;
-            pos = dummy_pos; };
+            loc = dummy_loc; };
           e2 = lit_int_1;
-          pos = dummy_pos; } );
+          loc = dummy_loc; } );
       parse_test_exp ("1 + 1 = 2 & true")
         ( "1 + 1 = 2 & true" )
         ( BinOpExp {
@@ -143,11 +143,11 @@ let parse_tests_for_binops_basics =
               op = Add;
               e1 = lit_int_1;
               e2 = lit_int_1;
-              pos = dummy_pos; };
+              loc = dummy_loc; };
             e2 = lit_int_2;
-            pos = dummy_pos; };
+            loc = dummy_loc; };
           e2 = lit_bool_true;
-          pos = dummy_pos; } );
+          loc = dummy_loc; } );
     ]
 
 let () =

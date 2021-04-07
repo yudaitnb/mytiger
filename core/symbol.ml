@@ -52,14 +52,13 @@ let symbol name =
 let pp_symbol ppf s =
   Format.fprintf ppf "\"%s\"" (name s)
 
-
 (*
  * Map.Make
  * - Map.OrderedTypeを受け取り、テーブルの実装を返すfunctor
  * - Map.OrderedTypeはマップキーの型tと、順序付け関数compareの実装が必要
  * https://ocaml.jp/archive/ocaml-manual-3.06-ja/libref/Map.Make.html
  *)
-module Table = Map.Make(
+ module Table = Map.Make(
   (* purely applicative (no side-effects) association tables over ordered types *)
   struct
     type t = symbol

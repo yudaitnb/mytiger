@@ -5,12 +5,12 @@ module L = Lexing
 (* type for a location in source code *)
 type position = [%import: Lexing.position] [@@deriving show]
 
-type t = position * position
+type location = position * position
 [@@deriving show]
 
 (* initializing *)
 
-let dummy =
+let dummy_loc =
   (Lexing.dummy_pos, Lexing.dummy_pos)
 
 let curr_loc lexbuf =
@@ -36,14 +36,3 @@ let pp_location ppf (left, right) =
     Format.fprintf ppf "%a-%a"
                    pp_position left
                    pp_position right
-
-(* Annotating a value with a location *)
-
-type 'a loc = (t [@printer pp_location]) * 'a
-[@@deriving show]
-
-let mkloc loc x = (loc, x)
-
-let mknoloc x = mkloc dummy x
-
-let loc (location, _) = location

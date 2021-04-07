@@ -1,10 +1,4 @@
-type position = Lexing.position =
-  { pos_fname : string
-  ; pos_lnum : int
-  ; pos_bol : int
-  ; pos_cnum : int
-  }
-  [@@deriving show, eq]
+open Location
 
 type name = string [@@deriving show, eq]
 
@@ -23,33 +17,32 @@ type binop =
   | Or
   [@@deriving show, eq]
 
-type unop =
+(* type unop =
   | Minus
   | Not
-  [@@deriving show, eq]
+  [@@deriving show, eq] *)
 
 
 type exp =
-  | IntExp of    { value : int; pos : position [@equal fun _ _ -> true]; }
-  | BoolExp of   { value : bool; pos : position [@equal fun _ _ -> true]; }
-  | StringExp of { value : string; pos : position [@equal fun _ _ -> true]; }
-  | VarExp of    { name : name; pos : position [@equal fun _ _ -> true]; }
-  | BinOpExp of  { op : binop; e1 : exp; e2 : exp; pos : position [@equal fun _ _ -> true]; }
-  | UnOpExp  of  { op : unop; e : exp; pos : position [@equal fun _ _ -> true]; }
-  | IfExp of     { cond : exp; th : exp ; el : exp option; pos : position [@equal fun _ _ -> true]; }
+  | IntExp of    { value : int; loc : location [@equal fun _ _ -> true]; }
+  | BoolExp of   { value : bool; loc : location [@equal fun _ _ -> true]; }
+  | StringExp of { value : string; loc : location [@equal fun _ _ -> true]; }
+  | VarExp of    { name : name; loc : location [@equal fun _ _ -> true]; }
+  | BinOpExp of  { op : binop; e1 : exp; e2 : exp; loc : location [@equal fun _ _ -> true]; }
+  | IfExp of     { cond : exp; th : exp ; el : exp option; loc : location [@equal fun _ _ -> true]; }
   (* ループ *)
-  | WhileExp  of { cond : exp; body : exp; pos : position [@equal fun _ _ -> true]; }
-  | ForExp    of { var : name; lo : exp; hi : exp; body : exp; pos : position [@equal fun _ _ -> true]; }
-  | BreakExp  of { pos : position [@equal fun _ _ -> true]; }
+  | WhileExp  of { cond : exp; body : exp; loc : location [@equal fun _ _ -> true]; }
+  | ForExp    of { var : name; lo : exp; hi : exp; body : exp; loc : location [@equal fun _ _ -> true]; }
+  | BreakExp  of { loc : location [@equal fun _ _ -> true]; }
   (* レコード *)
-  | NilExp    of { pos : position [@equal fun _ _ -> true]; }
-  | RecordExp of { record_fields : (name * exp) list; record_type : name; pos : position [@equal fun _ _ -> true]; }
-  | DotExp    of { record : exp; label : name; pos : position [@equal fun _ _ -> true]; }
+  | NilExp    of { loc : location [@equal fun _ _ -> true]; }
+  | RecordExp of { record_name : name; record_fields : (name * exp) list; loc : location [@equal fun _ _ -> true]; }
+  | DotExp    of { record : exp; label : name; loc : location [@equal fun _ _ -> true]; }
   (* 配列 *)
-  | ArrayExp of  { size : exp; init : exp; array_type : name; pos : position [@equal fun _ _ -> true]; }
+  | ArrayExp of  { array_name : name; size : exp; init : exp; loc : location [@equal fun _ _ -> true]; }
   (* 列化 *)
   | SeqExp of exp list
-  | LetExp of    { decs : dec list; body : exp; pos : position [@equal fun _ _ -> true]; }
+  | LetExp of    { decs : dec list; body : exp; loc : location [@equal fun _ _ -> true]; }
   | EOF
   [@@deriving show, eq]
 
@@ -68,7 +61,7 @@ and ty =
 and tydec = {
   tyname : name;
   ty : ty;
-  pos : position; [@equal fun _ _ -> true]
+  loc : location; [@equal fun _ _ -> true]
 }
 [@@deriving show, eq]
 
@@ -76,7 +69,7 @@ and vardec = {
   var_name : name;
   var_type : name option;
   init_val : exp;
-  pos : position; [@equal fun _ _ -> true]
+  loc : location; [@equal fun _ _ -> true]
 }
 [@@deriving show, eq]
 
@@ -85,7 +78,7 @@ and fundec = {
   params : field list;
   result_type : name option;
   body : exp;
-  pos : position; [@equal fun _ _ -> true]
+  loc : location; [@equal fun _ _ -> true]
 }
 [@@deriving show, eq]
 
