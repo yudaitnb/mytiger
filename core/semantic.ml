@@ -167,8 +167,9 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
   )
 
   (* レコード取り出し *)
-  | DotExp { record; label; loc; }
-    -> Error.fatal "unimplemented"
+  | DotExp { record; label; loc; } ->
+    let x = check_exp venv tenv false in
+    Error.fatal "unimplemented"
 
   (*
    * 配列

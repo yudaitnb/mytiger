@@ -23,12 +23,23 @@ type binop =
   [@@deriving show, eq] *)
 
 
-type exp =
+type var =
+  | SimpleVar of    { name : name; loc : location; }
+  | FieldVar of     { var : var; name : name; loc : location; }
+  | SubscriptVar of { var : var; exp : exp; loc : location; }
+[@@deriving show, eq]
+
+and exp =
   | IntExp of    { value : int; loc : location [@equal fun _ _ -> true]; }
   | BoolExp of   { value : bool; loc : location [@equal fun _ _ -> true]; }
   | StringExp of { value : string; loc : location [@equal fun _ _ -> true]; }
+  (* 変数 *)
   | VarExp of    { name : name; loc : location [@equal fun _ _ -> true]; }
+  (* 代入式 *)
+  | AssignExp of { var : var; exp : exp; loc : location [@equal fun _ _ -> true]; }
+  (* 二項演算 *)
   | BinOpExp of  { op : binop; e1 : exp; e2 : exp; loc : location [@equal fun _ _ -> true]; }
+  (* if式 *)
   | IfExp of     { cond : exp; th : exp ; el : exp option; loc : location [@equal fun _ _ -> true]; }
   (* ループ *)
   | WhileExp  of { cond : exp; body : exp; loc : location [@equal fun _ _ -> true]; }
@@ -42,6 +53,7 @@ type exp =
   | ArrayExp of  { array_name : name; size : exp; init : exp; loc : location [@equal fun _ _ -> true]; }
   (* 列化 *)
   | SeqExp of exp list
+  (* let式 *)
   | LetExp of    { decs : dec list; body : exp; loc : location [@equal fun _ _ -> true]; }
   | EOF
   [@@deriving show, eq]

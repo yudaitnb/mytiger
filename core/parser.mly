@@ -86,7 +86,12 @@ exp:
     { ArrayExp { array_name=type_id; size=e1; init=e2; loc = ($startpos, $endpos) } }
 
   // 変数
-  | ID                { VarExp { name = $1; loc = ($startpos, $endpos) } }
+  | ID
+    { VarExp { name = $1; loc = ($startpos, $endpos) } }
+
+  // 代入式
+  | lvalue=var ASSIGN e=exp
+    { AssignExp { var = lvalue; exp = e; loc = ($startpos, $endpos) } }
 
   // 二項演算
   | exp PLUS exp      { BinOpExp { op=Add; e1=$1; e2=$3; loc = ($startpos, $endpos) } }
@@ -134,6 +139,14 @@ exp:
   // (e1; e2; ... ; en)
   | LPAREN es=separated_list(SEMICOLON, exp) RPAREN
     { SeqExp es }
+
+var:
+  | v=ID
+    { SimpleVar { name = v; loc = ($startpos, $endpos) } }
+  | v=var DOT f=ID
+    { FieldVar { var = v; name = f; loc = ($startpos, $endpos) } }
+  | v=var LBRACKET e=exp RBRACKET
+    { SubscriptVar { var = v; exp = e; loc = ($startpos, $endpos) } }
 
 // Declarations
 dec :

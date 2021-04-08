@@ -3,10 +3,10 @@
 module L = Lexing
 
 (* type for a location in source code *)
-type position = [%import: Lexing.position] [@@deriving show]
+type position = [%import: Lexing.position] [@@deriving show, eq]
 
 type location = position * position
-[@@deriving show]
+[@@deriving show, eq]
 
 (* initializing *)
 
