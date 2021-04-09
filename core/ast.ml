@@ -34,7 +34,7 @@ and exp =
   | BoolExp of   { value : bool; loc : location [@equal fun _ _ -> true]; }
   | StringExp of { value : string; loc : location [@equal fun _ _ -> true]; }
   (* 変数 *)
-  | VarExp of    { name : name; loc : location [@equal fun _ _ -> true]; }
+  | VarExp of    { var : var; loc : location [@equal fun _ _ -> true]; }
   (* 代入式 *)
   | AssignExp of { var : var; exp : exp; loc : location [@equal fun _ _ -> true]; }
   (* 二項演算 *)
@@ -48,7 +48,6 @@ and exp =
   (* レコード *)
   | NilExp    of { loc : location [@equal fun _ _ -> true]; }
   | RecordExp of { record_name : name; record_fields : (name * exp) list; loc : location [@equal fun _ _ -> true]; }
-  | DotExp    of { record : exp; label : name; loc : location [@equal fun _ _ -> true]; }
   (* 配列 *)
   | ArrayExp of  { array_name : name; size : exp; init : exp; loc : location [@equal fun _ _ -> true]; }
   (* 列化 *)

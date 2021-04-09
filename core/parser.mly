@@ -77,20 +77,18 @@ exp:
     { NilExp { loc = ($startpos, $endpos) } }
   | record_id=ID LBRACE fields=separated_list(COMMA, field) RBRACE
     { RecordExp { record_name=record_id; record_fields=fields; loc = ($startpos, $endpos) } }
-  | arr=exp DOT label=ID
-    { DotExp { record=arr; label=label; loc = ($startpos, $endpos) } }
 
   // 配列
   // type-id [e1] of e2
   | type_id=ID LBRACKET e1=exp RBRACKET OF e2=exp
     { ArrayExp { array_name=type_id; size=e1; init=e2; loc = ($startpos, $endpos) } }
 
-  // 変数
-  | ID
-    { VarExp { name = $1; loc = ($startpos, $endpos) } }
+  // 左辺値(変数含)
+  | lvalue
+    { VarExp { var = $1; loc = ($startpos, $endpos)  } }
 
   // 代入式
-  | lvalue=var ASSIGN e=exp
+  | lvalue=lvalue ASSIGN e=exp
     { AssignExp { var = lvalue; exp = e; loc = ($startpos, $endpos) } }
 
   // 二項演算
@@ -140,12 +138,12 @@ exp:
   | LPAREN es=separated_list(SEMICOLON, exp) RPAREN
     { SeqExp es }
 
-var:
+lvalue:
   | v=ID
     { SimpleVar { name = v; loc = ($startpos, $endpos) } }
-  | v=var DOT f=ID
+  | v=lvalue DOT f=ID
     { FieldVar { var = v; name = f; loc = ($startpos, $endpos) } }
-  | v=var LBRACKET e=exp RBRACKET
+  | v=lvalue LBRACKET e=exp RBRACKET
     { SubscriptVar { var = v; exp = e; loc = ($startpos, $endpos) } }
 
 // Declarations

@@ -49,6 +49,22 @@ end
 
 type expty = { exp: Translate.exp; ty: Types.ty }
 
+let rec check_var (venv : E.venv) var =
+  match var with
+  | A.SimpleVar { name; loc } -> (
+    let sym = S.symbol name in
+    match varlook venv sym loc with
+    | E.FunEntry _      -> misdefined loc "variable" sym
+    | E.VarEntry { ty } -> T.actual_ty ty
+  )
+  | _ -> Error.fatal "not implemented"
+
+let rec check_dec venv tenc dec =
+  Error.fatal "unimplemented"
+
+let rec check_ty venv tenv ty =
+  Error.fatal "unimplemented"
+
 (* Ast.Expから(Translate.Exp, Types.ty)への変換 *)
 let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
   match exp with
@@ -81,6 +97,27 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
     | A.Or  -> check_int tye1 loc; check_int tye2 loc; T.INT
   )
 
+  (*
+   * 左辺値
+   * 値環境中でその変数に割り当てられた型がその値の型
+   *)
+  | VarExp { var; _ } ->
+    let tyvar = check_var venv var in
+    tyvar
+    
+  (*
+   * 代入式
+   * lvalue : = exp
+   * lvalueを評価してからexpを評価する。
+   * lvalueの内容に式の結果を設定する
+   * 値を生成しない
+   *)
+  | AssignExp { var; exp; loc } -> 
+    let tylvalue = check_var venv var in
+    let tyexp = check_exp venv tenv inloop exp in
+    coerce tylvalue tyexp loc;
+    T.UNIT
+
   (* 
    * if-exp
    * - else節が存在するなら、二つの返り値型tythとtyelは同じ型
@@ -93,7 +130,8 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
     | None -> tyth
     | Some el' -> 
       let tyel = check_exp venv tenv inloop el' in 
-      coerce tyth tyel loc; tyth
+      coerce tyth tyel loc;
+      tyth
     )
   )
 
@@ -141,7 +179,7 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
    * in ...
    * 以下の2つの型が等しい
    * - 各フィールドの型
-   * - 型環境中に存在するレコード型T.RECORD {(S.symbol * ty) list * unique}の対応するフィールドの要素型ty
+   * - 型環境中に存在するレコード型T.RECORD {(S.symbol * ty) list * unique}中の対応するフィールドの要素型ty
    *)
   | RecordExp { record_name; record_fields; loc; } -> (
     let t_rec_fields = 
@@ -157,6 +195,7 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
         | [] -> []
         | (_,ty)::rst -> ty :: (maketylist rst)
       in
+      (* 各フィールドの型が等しいか検査 *)
       (List.iter2
         (fun a b -> coerce a b loc)
         (t_rec_fields)
@@ -165,11 +204,6 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
     | _ -> misdefined loc "array type" (S.symbol record_name)
     end
   )
-
-  (* レコード取り出し *)
-  | DotExp { record; label; loc; } ->
-    let x = check_exp venv tenv false in
-    Error.fatal "unimplemented"
 
   (*
    * 配列
@@ -186,13 +220,34 @@ let rec check_exp (venv : E.venv) (tenv : E.tenv) inloop exp =
     | _ -> misdefined loc "array type" (S.symbol array_name)
     end
 
-  (* 式列 *)
-  | SeqExp explist
-    -> Error.fatal "unimplemented"
+  (*
+   * 式列
+   * 最後の式の値が返り値
+   *)
+  | SeqExp explist ->
+    let ty = List.fold_left
+      (fun _ exp ->
+        let t = check_exp venv tenv inloop exp in
+        t)
+      (T.UNIT)
+      (explist)
+    in
+      ty
 
   (* Let式 *)
-  | LetExp { decs; body; loc; }
-    -> Error.fatal "unimplemented"
+  | LetExp { decs; body; _; } ->
+    (* let env' = List.fold_left
+      (fun _ dec ->
+        let new_env = check_dec venv tenv dec in
+        new_env)
+      (venv)
+      (decs)
+    in *)
+      let t = check_exp venv tenv inloop body in
+      t
   
   | EOF -> T.UNIT
   | _ -> Error.fatal "unimplemented"
+
+let typeof program =
+  check_exp E.base_venv E.base_tenv false program
