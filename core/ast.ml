@@ -54,7 +54,6 @@ and exp =
   | SeqExp of exp list
   (* let式 *)
   | LetExp of    { decs : dec list; body : exp; loc : location [@equal fun _ _ -> true]; }
-  | EOF
   [@@deriving show, eq]
 
 and dec =
@@ -64,15 +63,15 @@ and dec =
   [@@deriving show, eq]
 
 and ty =
-  | NameTy   of name
+  | NameTy   of name * location
   | RecordTy of field list
-  | ArrayTy  of name
+  | ArrayTy  of name * location
   [@@deriving show, eq]
 
 and tydec = {
   tyname : name;
   ty : ty;
-  loc : location; [@equal fun _ _ -> true]
+  loc : location [@equal fun _ _ -> true]
 }
 [@@deriving show, eq]
 
@@ -80,7 +79,7 @@ and vardec = {
   var_name : name;
   var_type : name option;
   init_val : exp;
-  loc : location; [@equal fun _ _ -> true]
+  loc : location [@equal fun _ _ -> true]
 }
 [@@deriving show, eq]
 

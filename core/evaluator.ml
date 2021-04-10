@@ -78,5 +78,4 @@ let rec eval exp stack env =
     -> VInt 1
   | LetExp { decs : (dec node) list; body : exp; pos : position; }
     -> VInt 1 *)
-  | EOF -> `VInt 1
   | _   -> `VInt 1

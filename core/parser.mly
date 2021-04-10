@@ -186,8 +186,8 @@ tyfield :
 
 ty:
   | ty=ID
-    { NameTy ty }
+    { NameTy (ty, ($startpos, $endpos)) }
   | LBRACE fields=separated_list(COMMA, tyfield) RBRACE
     { RecordTy fields }
   | ARRAY OF ty=ID
-    { ArrayTy ty }
+    { ArrayTy (ty, ($startpos, $endpos)) }

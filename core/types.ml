@@ -18,7 +18,7 @@
  * レコード型と配列型に付与されるユニーク値
  * フィールドが完全に一致していても新しいレコード型を生成する
  *)
- type unique = unit ref
+type unique = unit ref
 [@@deriving show, eq]
 
 (* 型識別子 *)
