@@ -8,6 +8,8 @@ type position = [%import: Lexing.position] [@@deriving show, eq]
 type location = position * position
 [@@deriving show, eq]
 
+let equal_location _ _ = true
+
 (* initializing *)
 
 let dummy_loc =

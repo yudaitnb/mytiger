@@ -48,8 +48,6 @@ type ty =
    * - 相互再帰型に使う
    *)
   | NAME of Symbol.symbol * ty option ref
-  (* 関数型？ *)
-  | FUNCTION of ty list * ty
 [@@deriving show, eq]
 
 (* NAME型の参照する型を検索する *)
@@ -69,7 +67,6 @@ let rec actual_ty = function
   | NIL                       , RECORD _                   -> true
   | RECORD (_,uniqa)          , RECORD (_,uniqb)           -> uniqa = uniqb
   | ARRAY (_,uniqa)           , ARRAY (_,uniqb)            -> uniqa = uniqb
-  | FUNCTION _                , FUNCTION _                 -> false
   | _                                                      -> false
 
 
@@ -84,7 +81,6 @@ let rec string_of_ty = function
   | NIL                       -> "NIL"
   | RECORD _                  -> "RECORD"
   | ARRAY _                   -> "ARRAY"
-  | FUNCTION (formals,result) -> "FUNCTION:" ^ String.concat "->" (List.map string_of_ty (formals @ [result]))
   | NAME (n,_)                -> "NAME " ^ name n
 
 (* let rec tree_of_ty = function

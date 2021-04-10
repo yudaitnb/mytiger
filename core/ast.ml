@@ -30,30 +30,30 @@ type var =
 [@@deriving show, eq]
 
 and exp =
-  | IntExp of    { value : int; loc : location [@equal fun _ _ -> true]; }
-  | BoolExp of   { value : bool; loc : location [@equal fun _ _ -> true]; }
-  | StringExp of { value : string; loc : location [@equal fun _ _ -> true]; }
+  | IntExp of    { value : int; loc : location; }
+  | BoolExp of   { value : bool; loc : location; }
+  | StringExp of { value : string; loc : location; }
   (* 変数 *)
-  | VarExp of    { var : var; loc : location [@equal fun _ _ -> true]; }
+  | VarExp of    { var : var; loc : location; }
   (* 代入式 *)
-  | AssignExp of { var : var; exp : exp; loc : location [@equal fun _ _ -> true]; }
+  | AssignExp of { var : var; exp : exp; loc : location; }
   (* 二項演算 *)
-  | BinOpExp of  { op : binop; e1 : exp; e2 : exp; loc : location [@equal fun _ _ -> true]; }
+  | BinOpExp of  { op : binop; e1 : exp; e2 : exp; loc : location; }
   (* if式 *)
-  | IfExp of     { cond : exp; th : exp ; el : exp option; loc : location [@equal fun _ _ -> true]; }
+  | IfExp of     { cond : exp; th : exp ; el : exp option; loc : location; }
   (* ループ *)
-  | WhileExp  of { cond : exp; body : exp; loc : location [@equal fun _ _ -> true]; }
-  | ForExp    of { var : name; lo : exp; hi : exp; body : exp; loc : location [@equal fun _ _ -> true]; }
-  | BreakExp  of { loc : location [@equal fun _ _ -> true]; }
+  | WhileExp  of { cond : exp; body : exp; loc : location; }
+  | ForExp    of { var : name; lo : exp; hi : exp; body : exp; loc : location; }
+  | BreakExp  of { loc : location; }
   (* レコード *)
-  | NilExp    of { loc : location [@equal fun _ _ -> true]; }
-  | RecordExp of { record_name : name; record_fields : (name * exp) list; loc : location [@equal fun _ _ -> true]; }
+  | NilExp    of { loc : location; }
+  | RecordExp of { record_name : name; record_fields : (name * exp) list; loc : location; }
   (* 配列 *)
-  | ArrayExp of  { array_name : name; size : exp; init : exp; loc : location [@equal fun _ _ -> true]; }
+  | ArrayExp of  { array_name : name; size : exp; init : exp; loc : location; }
   (* 列化 *)
   | SeqExp of exp list
   (* let式 *)
-  | LetExp of    { decs : dec list; body : exp; loc : location [@equal fun _ _ -> true]; }
+  | LetExp of    { decs : dec list; body : exp; loc : location; }
   [@@deriving show, eq]
 
 and dec =
@@ -71,7 +71,7 @@ and ty =
 and tydec = {
   tyname : name;
   ty : ty;
-  loc : location [@equal fun _ _ -> true]
+  loc : location
 }
 [@@deriving show, eq]
 
@@ -79,7 +79,7 @@ and vardec = {
   var_name : name;
   var_type : name option;
   init_val : exp;
-  loc : location [@equal fun _ _ -> true]
+  loc : location
 }
 [@@deriving show, eq]
 
