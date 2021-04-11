@@ -1,4 +1,4 @@
 (tests
  (libraries ounit2 core)
- (names parserTest semanticTest)
+ (names lexerTest parserTest semanticTest)
  (flags (:standard -warn-error -a)))

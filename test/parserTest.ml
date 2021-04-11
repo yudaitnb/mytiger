@@ -5,56 +5,56 @@ open Util
 (* リテラル用のテスト *)
 let parse_tests_for_literals =
   "parse test for literals" >::: [
-    parse_test_exp ("IntExp (1)")
+    test_utility_parser ("IntExp 1")
       ( "1" )
       ( IntExp {value = 1; loc = dummy_loc; } );
-    parse_test_exp ("BoolExp false")
+    test_utility_parser ("IntExp 1234")
       ( "1234" )
       ( IntExp {value = 1234; loc = dummy_loc; } );
-    parse_test_exp ("StringExp (\"aiueo\")")
+    test_utility_parser ("StringExp (\"aiueo\")")
       ( "\"hoge\"" )
       ( StringExp {value = "hoge"; loc = dummy_loc; } );
   ]
 
 let parse_tests_for_binops_basics =
   "parse test for binops" >::: [
-    parse_test_exp ("1 + 1")
+    test_utility_parser ("1 + 1")
       ( "1 + 1" )
       ( BinOpExp {op = Add; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 - 1")
+    test_utility_parser ("1 - 1")
       ( "1 - 1" )
       ( BinOpExp {op = Sub; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 * 1")
+    test_utility_parser ("1 * 1")
       ( "1 * 1" )
       ( BinOpExp {op = Mul; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 / 1")
+    test_utility_parser ("1 / 1")
       ( "1 / 1" )
       ( BinOpExp {op = Div; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 = 1")
+    test_utility_parser ("1 = 1")
       ( "1 = 1" )
       ( BinOpExp {op = Eq; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 <> 1")
+    test_utility_parser ("1 <> 1")
       ( "1 <> 1" )
       ( BinOpExp {op = Neq; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 < 1")
+    test_utility_parser ("1 < 1")
       ( "1 < 1" )
       ( BinOpExp {op = Lt; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 <= 1")
+    test_utility_parser ("1 <= 1")
       ( "1 <= 1" )
       ( BinOpExp {op = Lte; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 > 1")
+    test_utility_parser ("1 > 1")
       ( "1 > 1" )
       ( BinOpExp {op = Gt; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
-    parse_test_exp ("1 >= 1")
+    test_utility_parser ("1 >= 1")
       ( "1 >= 1" )
       ( BinOpExp {op = Gte; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
       ;
@@ -62,7 +62,7 @@ let parse_tests_for_binops_basics =
 
 let parse_tests_for_binops_assoc =
   "parse test for binops" >::: [
-    parse_test_exp ("1 + 1 * 1")
+    test_utility_parser ("1 + 1 * 1")
       ( "1 + 1 * 1" )
       ( BinOpExp {
         op = Add;
@@ -73,7 +73,7 @@ let parse_tests_for_binops_assoc =
           e2 = lit_int_1;
           loc = dummy_loc; };
         loc = dummy_loc; } );
-    parse_test_exp ("1 - 1 / 1")
+    test_utility_parser ("1 - 1 / 1")
       ( "1 - 1 / 1" )
       ( BinOpExp {
         op = Sub;
@@ -84,7 +84,7 @@ let parse_tests_for_binops_assoc =
           e2 = lit_int_1;
           loc = dummy_loc; };
         loc = dummy_loc; } );
-    parse_test_exp ("(1 + 1) * 1")
+    test_utility_parser ("(1 + 1) * 1")
       ( "(1 + 1) * 1" )
       ( BinOpExp {
         op = Mul;
@@ -97,7 +97,7 @@ let parse_tests_for_binops_assoc =
         ]);
         e2 = lit_int_1;
         loc = dummy_loc; } );
-    parse_test_exp ("1 + 1 = 2")
+    test_utility_parser ("1 + 1 = 2")
       ( "1 + 1 = 2" )
       ( BinOpExp {
         op = Eq;
@@ -108,7 +108,7 @@ let parse_tests_for_binops_assoc =
           loc = dummy_loc; };
         e2 = lit_int_2;
         loc = dummy_loc; } );
-    parse_test_exp ("1 + 1 > 1")
+    test_utility_parser ("1 + 1 > 1")
       ( "1 + 1 > 1" )
       ( BinOpExp {
         op = Gt;
@@ -119,7 +119,7 @@ let parse_tests_for_binops_assoc =
           loc = dummy_loc; };
         e2 = lit_int_1;
         loc = dummy_loc; } );
-    parse_test_exp ("1 + 1 = 2 & 1")
+    test_utility_parser ("1 + 1 = 2 & 1")
       ( "1 + 1 = 2 & 1" )
       ( BinOpExp {
         op = And;
