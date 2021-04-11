@@ -53,7 +53,6 @@ type expty = { exp: Translate.exp; ty: Types.ty }
 let rec check_exp (((venv : E.venv), (tenv : E.tenv), inloop) as env) exp =
   match exp with
   | A.IntExp _    -> T.INT
-  | A.BoolExp _   -> T.INT
   | A.StringExp _ -> T.STRING
   | NilExp _      -> T.NIL
 

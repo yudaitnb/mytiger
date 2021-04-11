@@ -31,7 +31,6 @@ type var =
 
 and exp =
   | IntExp of    { value : int; loc : location; }
-  | BoolExp of   { value : bool; loc : location; }
   | StringExp of { value : string; loc : location; }
   (* 変数 *)
   | VarExp of    { var : var; loc : location; }

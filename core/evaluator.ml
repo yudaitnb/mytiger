@@ -4,7 +4,6 @@ open Stack *)
 
 type value = [
   | `VInt  of int
-  | `VBool of bool
   | `VString of string
   (* | `VUnit *)
   | `VRecord of value list
@@ -14,7 +13,6 @@ type value = [
 let get_value value = 
   match value with
   | `VInt  i -> i
-  | `VBool b -> b
   | `VString s -> s
   (* | `VUnit  -> unit *)
   | `VRecord values -> values
@@ -27,7 +25,6 @@ let env = Stack.create *)
 let rec eval exp stack env = 
   match exp with
   | IntExp v    -> `VInt v.value
-  | BoolExp v   -> `VBool v.value
   | StringExp v -> `VString v.value
   (* | BinOp { op : binop; e1 : exp; e2 : exp; _; } -> (
     let v1 = eval e1 stack env in
@@ -45,14 +42,14 @@ let rec eval exp stack env =
     | Gte -> VBool (v1 >= v2)
     | And -> VBool (v1 && v2)
     | Or  -> VBool (v1 || v2) ) *)
-  | IfExp { cond : exp; th : exp ; el : exp option; _; } -> (
+  (* | IfExp { cond : exp; th : exp ; el : exp option; _; } -> (
     let res_cond = eval cond stack env in
     if equal_value res_cond (`VBool true)
       then eval th stack env
       else ( match el with
         | Some x -> eval x stack env
         | None   -> failwith "a"
-    ) )
+    ) ) *)
   (* ループ *)
   (* | WhileExp  { cond : exp; body : exp; pos : position; } -> (
     let res_cond = (eval cond stack env).value in

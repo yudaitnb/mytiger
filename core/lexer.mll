@@ -110,10 +110,6 @@ and token = parse
   | "&"           { AND }
   | "|"           { OR }
 
-  (* 真偽値 *)
-  | "true"        { BOOL true }
-  | "false"       { BOOL false }
-
   (* 空リスト *)
   | "nil"         { NIL }
 

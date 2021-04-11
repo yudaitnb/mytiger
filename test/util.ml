@@ -9,8 +9,6 @@ let dummy_loc = Core.Location.dummy_loc
 
 let lit_int_1 = IntExp {value = 1; loc = dummy_loc }
 let lit_int_2 = IntExp {value = 2; loc = dummy_loc }
-let lit_bool_true = BoolExp {value = true; loc = dummy_loc }
-let lit_bool_false = BoolExp {value = false; loc = dummy_loc }
 
 (* 
  * expの為のparseテスト

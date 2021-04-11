@@ -11,12 +11,6 @@ let parse_tests_for_literals =
     parse_test_exp ("BoolExp false")
       ( "1234" )
       ( IntExp {value = 1234; loc = dummy_loc; } );
-    parse_test_exp ("BoolExp true")
-      ( "true" )
-      ( BoolExp {value = true; loc = dummy_loc; } );
-    parse_test_exp ("BoolExp false")
-      ( "false" )
-      ( BoolExp {value = false; loc = dummy_loc; } );
     parse_test_exp ("StringExp (\"aiueo\")")
       ( "\"hoge\"" )
       ( StringExp {value = "hoge"; loc = dummy_loc; } );
@@ -63,14 +57,6 @@ let parse_tests_for_binops_basics =
     parse_test_exp ("1 >= 1")
       ( "1 >= 1" )
       ( BinOpExp {op = Gte; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc;} )
-      ;
-    parse_test_exp ("true & true")
-      ( "true & true" )
-      ( BinOpExp {op = And; e1=lit_bool_true; e2=lit_bool_true; loc = dummy_loc;} )
-      ;
-    parse_test_exp ("true | false")
-      ( "true | true" )
-      ( BinOpExp {op = Or; e1=lit_bool_true; e2=lit_bool_true; loc = dummy_loc;} )
       ;
   ]
 
@@ -133,8 +119,8 @@ let parse_tests_for_binops_assoc =
           loc = dummy_loc; };
         e2 = lit_int_1;
         loc = dummy_loc; } );
-    parse_test_exp ("1 + 1 = 2 & true")
-      ( "1 + 1 = 2 & true" )
+    parse_test_exp ("1 + 1 = 2 & 1")
+      ( "1 + 1 = 2 & 1" )
       ( BinOpExp {
         op = And;
         e1 = BinOpExp {
@@ -146,7 +132,7 @@ let parse_tests_for_binops_assoc =
             loc = dummy_loc; };
           e2 = lit_int_2;
           loc = dummy_loc; };
-        e2 = lit_bool_true;
+        e2 = lit_int_1;
         loc = dummy_loc; } );
   ]
 

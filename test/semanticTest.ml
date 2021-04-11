@@ -11,12 +11,6 @@ let semantic_tests_for_literals =
     semantic_test_exp ("BoolExp false")
       ( "1234" )
       ( INT );
-    semantic_test_exp ("BoolExp true")
-      ( "true" )
-      ( INT );
-    semantic_test_exp ("BoolExp false")
-      ( "false" )
-      ( INT );
     semantic_test_exp ("StringExp (\"aiueo\")")
       ( "\"hoge\"" )
       ( STRING );

@@ -33,7 +33,6 @@ let node_id = ref 1
 %token <string> ID  // 変数
 %token <int> INT    // 数字
 %token <string> STR // 文字列
-%token <bool> BOOL  // 真偽値
 
 // EOF
 %token EOF
@@ -66,8 +65,6 @@ exp:
     { IntExp    { value = $1; loc = ($startpos, $endpos) } }
   | STR
     { StringExp { value = $1; loc = ($startpos, $endpos) } }
-  | BOOL
-    { BoolExp   { value = $1; loc = ($startpos, $endpos) } }
 
   // レコード
   // nil
