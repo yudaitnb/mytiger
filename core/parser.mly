@@ -130,13 +130,14 @@ exp:
 
   // let式
   // let DECS in EXP end
-  | LET decs=list(dec) IN exp=exp END
-    { LetExp { decs=decs; body=exp; loc = ($startpos, $endpos) } }
+  | LET decs=list(dec) IN expseq=separated_list(SEMICOLON, exp) END
+    { LetExp { decs=decs; body=(SeqExp expseq); loc = ($startpos, $endpos) } }
   
   // 列化
   // (e1; e2; ... ; en)
   | LPAREN es=separated_list(SEMICOLON, exp) RPAREN
     { SeqExp es }
+
 
 lvalue:
   | v=ID

@@ -83,7 +83,7 @@ let rec check_exp (((venv : E.venv), (tenv : E.tenv), inloop) as env) exp =
 
   (*
    * 左辺値
-   * 値環境中でその変数に割り当てられた型がその値の型
+   * - 値環境中でその変数に割り当てられた型がその値の型
    *)
   | VarExp { var; _ } ->
     let tyvar = check_var venv var in

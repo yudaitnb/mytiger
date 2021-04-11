@@ -1,6 +1,8 @@
 open OUnit2
-open Core.Ast
 open Core.Util
+open Core.Ast
+module S = Core.Semantic
+module T = Core.Types
 
 let dummy_id = 0
 let dummy_loc = Core.Location.dummy_loc
@@ -21,5 +23,12 @@ let parse_test_exp name input expected =
   name >::
   (fun _ -> assert_equal ~printer:(show_exp) ~cmp:(equal_exp)
     (parse_from_string input)
+    (expected)
+  )
+
+let semantic_test_exp name input expected =
+  name >::
+  (fun _ -> assert_equal ~printer:(T.show_ty) ~cmp:(T.equal_ty)
+    (S.typeof (parse_from_string input))
     (expected)
   )
