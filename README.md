@@ -33,7 +33,7 @@ $ dune exec mytiger
 ## How to test the compiler
 
 ```
-$ dune test
+$ dune test -f
 ```
 
 ## References
