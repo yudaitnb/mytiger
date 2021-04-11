@@ -87,6 +87,7 @@ and token = parse
   | ":"           { COLON }
   | ";"           { SEMICOLON }
   | "."           { DOT }
+  (* | "@"           { AT } *)
 
   (* 括弧 *)
   | "("           { LPAREN }

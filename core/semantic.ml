@@ -271,7 +271,7 @@ and check_dec (((venv : E.venv), (tenv : E.tenv)) as env) dec : (E.venv * E.tenv
   | A.TypeDec tydecs -> 
     begin
       let env_new = List.fold_left
-        (fun (_, acctenv) ({ tyname; ty; loc } : A.tydec) ->
+        (fun (_, acctenv) ({ tyname; ty; _(*loc*) } : A.tydec) ->
           let tyvarsym = S.symbol tyname in
           let checkedty = check_ty (venv,tenv) ty in
           let tenv' = S.enter tyvarsym checkedty acctenv in
@@ -295,7 +295,11 @@ and check_dec (((venv : E.venv), (tenv : E.tenv)) as env) dec : (E.venv * E.tenv
    * これと結果型を使ってFunEntry {formals;result}を生成
    *)
   | A.FunDec fundecs -> 
-    let make_entry ({ name; params; result_type; body; loc } : A.fundec) venv =
+    let make_entry (fundec : A.fundec) venv =
+      let name = fundec.name in
+      let params = fundec.params in
+      let result_type = fundec.result_type in
+      let loc = fundec.loc in
       let symtylist = List.map
         (fun ({ field_name; field_type } : A.field) ->
           let sym_field_name = S.symbol field_name in
@@ -316,13 +320,13 @@ and check_dec (((venv : E.venv), (tenv : E.tenv)) as env) dec : (E.venv * E.tenv
         let venv'' = venv' (*TODO*) in
         (venv', venv'')
     in
-    let venv'_res =List.fold_left
-      (fun acc_venv fundec ->
-        let (venv', venv'') = make_entry fundec acc_venv in
-        venv')
-      (venv)
-      (fundecs) in
-    (venv'_res, tenv)
+      let venv'_res =List.fold_left
+        (fun acc_venv fundec ->
+          let (venv', (*venv''*)_) = make_entry fundec acc_venv in
+          venv')
+        (venv)
+        (fundecs) in
+      (venv'_res, tenv)
       
 (* 
  * type a = b
@@ -332,7 +336,8 @@ and check_dec (((venv : E.venv), (tenv : E.tenv)) as env) dec : (E.venv * E.tenv
  * | RecordTy of field list      -> RECORD of (Symbol.symbol * ty) list * unique
  * | ArrayTy  of name * location -> ARRAY of ty * unique
  *)
-and check_ty (((venv : E.venv), (tenv : E.tenv)) as env) ty =
+and check_ty env ty =
+  let (_ : E.venv), (tenv : E.tenv) = env in
   match ty with
   | A.NameTy (name,loc) -> 
     let symty = S.symbol name in

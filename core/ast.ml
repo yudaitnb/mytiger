@@ -34,6 +34,8 @@ and exp =
   | StringExp of { value : string; loc : location; }
   (* 変数 *)
   | VarExp of    { var : var; loc : location; }
+  (* 関数呼び出し *)
+  | CallExp of   { func : name; args : exp list; loc : location }
   (* 代入式 *)
   | AssignExp of { var : var; exp : exp; loc : location; }
   (* 二項演算 *)
@@ -55,30 +57,27 @@ and exp =
   | LetExp of    { decs : dec list; body : exp; loc : location; }
   [@@deriving show, eq]
 
-and dec =
-  | TypeDec of tydec list
-  | VarDec  of vardec
-  | FunDec  of fundec list
-  [@@deriving show, eq]
-
 and ty =
   | NameTy   of name * location
   | RecordTy of field list
   | ArrayTy  of name * location
   [@@deriving show, eq]
 
+and dec =
+  | TypeDec of tydec list
+  | VarDec  of {
+    var_name : name;
+    var_type : name option;
+    init_val : exp;
+    loc : location;
+  }
+  | FunDec  of fundec list
+  [@@deriving show, eq]
+
 and tydec = {
   tyname : name;
   ty : ty;
-  loc : location
-}
-[@@deriving show, eq]
-
-and vardec = {
-  var_name : name;
-  var_type : name option;
-  init_val : exp;
-  loc : location
+  tyloc : location
 }
 [@@deriving show, eq]
 
@@ -87,7 +86,7 @@ and fundec = {
   params : field list;
   result_type : name option;
   body : exp;
-  loc : location; [@equal fun _ _ -> true]
+  loc : location;
 }
 [@@deriving show, eq]
 

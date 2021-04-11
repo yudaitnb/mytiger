@@ -6,7 +6,7 @@ module L = Lexing
 type position = [%import: Lexing.position] [@@deriving show, eq]
 
 type location = position * position
-[@@deriving show, eq]
+[@@deriving show]
 
 let equal_location _ _ = true
 

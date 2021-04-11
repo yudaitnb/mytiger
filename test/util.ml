@@ -8,8 +8,17 @@ module T = Core.Types
 let dummy_id = 0
 let dummy_loc = Core.Location.dummy_loc
 
-let lit_int_1 = IntExp {value = 1; loc = dummy_loc }
-let lit_int_2 = IntExp {value = 2; loc = dummy_loc }
+let lit_int_0 = IntExp { value = 0; loc = dummy_loc; }
+let lit_int_1 = IntExp { value = 1; loc = dummy_loc; }
+let lit_int_2 = IntExp { value = 2; loc = dummy_loc; }
+let lit_nil = NilExp { loc = dummy_loc; }
+
+let lit_int_minus_1 = BinOpExp {
+  op = Sub;
+  e1 = IntExp { value = 0; loc=dummy_loc };
+  e2 = IntExp { value = 1; loc=dummy_loc };
+  loc = dummy_loc;
+}
 
 (* 
  * Lexerテストユーティリティ

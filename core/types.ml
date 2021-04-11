@@ -74,7 +74,7 @@ let name = Symbol.name
 let map = List.map
 (* let mkt = Tree.mkt *)
 
-let rec string_of_ty = function
+let string_of_ty = function
   | UNIT                      -> "UNIT"
   | INT                       -> "INT"
   | STRING                    -> "STRING"

@@ -1,7 +1,5 @@
 %{
 open Ast
-
-let node_id = ref 1
 %}
 
 // キーワード
@@ -18,6 +16,7 @@ let node_id = ref 1
 
 // セパレータ
 %token COMMA COLON SEMICOLON DOT
+// %token AT
 
 // 括弧
 %token LPAREN RPAREN
@@ -38,17 +37,21 @@ let node_id = ref 1
 %token EOF
 
 // 演算子の結合順位（結合順位が低い順）
-%nonassoc DO THEN OF
+%nonassoc DO THEN
+%left OF
 %nonassoc ELSE
+%nonassoc ASSIGN
 
-%left OR AND
-%nonassoc EQ NEQ LT GT LTE GTE
+%left OR
+%left AND
+%nonassoc EQ NEQ LT LTE GT GTE
 %left PLUS MINUS
 %left ASTERISK SLASH
 
-%left DOT
 %nonassoc UMINUS
 
+%nonassoc LVALUE
+%left LBRACKET
 
 %start <exp> prog
 
@@ -57,6 +60,14 @@ let node_id = ref 1
 // プログラムは大きな一つの式
 prog:
   | exp EOF { $1 }
+
+lvalue:
+  | v=ID %prec LVALUE
+    { SimpleVar { name = v; loc = ($startpos, $endpos) } }
+  | v=lvalue DOT f=ID
+    { FieldVar { var = v; name = f; loc = ($startpos, $endpos) } }
+  | v=lvalue LBRACKET e=exp RBRACKET
+    { SubscriptVar { var = v; exp = e; loc = ($startpos, $endpos) } }
 
 // 式
 exp:
@@ -80,14 +91,6 @@ exp:
   | type_id=ID LBRACKET e1=exp RBRACKET OF e2=exp
     { ArrayExp { array_name=type_id; size=e1; init=e2; loc = ($startpos, $endpos) } }
 
-  // 左辺値(変数含)
-  | lvalue
-    { VarExp { var = $1; loc = ($startpos, $endpos)  } }
-
-  // 代入式
-  | lvalue=lvalue ASSIGN e=exp
-    { AssignExp { var = lvalue; exp = e; loc = ($startpos, $endpos) } }
-
   // 二項演算
   | exp PLUS exp      { BinOpExp { op=Add; e1=$1; e2=$3; loc = ($startpos, $endpos) } }
   | exp MINUS exp     { BinOpExp { op=Sub; e1=$1; e2=$3; loc = ($startpos, $endpos) } }
@@ -103,7 +106,7 @@ exp:
   | exp OR exp        { BinOpExp { op=Or;  e1=$1; e2=$3; loc = ($startpos, $endpos) } }
 
   // 単項マイナス
-  | MINUS e = exp %prec UMINUS
+  | MINUS e=exp %prec UMINUS
     { BinOpExp { op=Sub; e1=IntExp {value=0;loc=($startpos, $endpos);}; e2=e; loc = ($startpos, $endpos) } }
 
   // 条件式
@@ -132,17 +135,21 @@ exp:
   
   // 列化
   // (e1; e2; ... ; en)
+  // 一要素のときは括弧と同じ
   | LPAREN es=separated_list(SEMICOLON, exp) RPAREN
     { SeqExp es }
 
+  // 左辺値(変数含)
+  | lvalue
+    { VarExp { var = $1; loc = ($startpos, $endpos)  } }
 
-lvalue:
-  | v=ID
-    { SimpleVar { name = v; loc = ($startpos, $endpos) } }
-  | v=lvalue DOT f=ID
-    { FieldVar { var = v; name = f; loc = ($startpos, $endpos) } }
-  | v=lvalue LBRACKET e=exp RBRACKET
-    { SubscriptVar { var = v; exp = e; loc = ($startpos, $endpos) } }
+  // 代入式
+  | lvalue=lvalue ASSIGN e=exp
+    { AssignExp { var = lvalue; exp = e; loc = ($startpos, $endpos) } }
+
+  // 関数呼び出し
+  | func=ID LPAREN args = separated_list(COMMA, exp) RPAREN
+    { CallExp { func = func; args = args; loc = ($startpos, $endpos)} }
 
 // Declarations
 dec :
@@ -156,7 +163,7 @@ dec :
 // type ID = TY
 tydec:
   | TYPE x=ID EQ user_ty=ty
-    { { tyname=x; ty=user_ty; loc = ($startpos, $endpos) } }
+    { { tyname=x; ty=user_ty; tyloc = ($startpos, $endpos) } }
 
 // var x:TY := EXP
 // var x := EXP
