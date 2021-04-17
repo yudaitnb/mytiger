@@ -2,9 +2,9 @@ open OUnit2
 open Core.Ast
 open Util
 
-(* リテラル用のテスト *)
 let parse_tests_for_literals =
-  "parse test for literals" >::: [
+  "parsing tests for literals" >::: [
+    (* 整数リテラル *)
     test_utility_parser ("0")
       ( "0" )
       ( IntExp { value = 0; loc = dummy_loc; } );
@@ -12,7 +12,7 @@ let parse_tests_for_literals =
       ( "1234" )
       ( IntExp { value = 1234; loc = dummy_loc; } );
 
-    (* 整形文字 *)
+    (* 整形文字リテラル *)
     test_utility_parser ("newline")
       ( "\"\\n\"" )
       ( StringExp { value = "\n"; loc = dummy_loc; } );
@@ -20,7 +20,7 @@ let parse_tests_for_literals =
       ( "\"\\t\"" )
       ( StringExp { value = "\t"; loc = dummy_loc; } );
 
-    (* 文字列 *)
+    (* 文字列リテラル *)
     test_utility_parser ("no characters")
       ( "\"\"" )
       ( StringExp { value = ""; loc = dummy_loc; } );
@@ -37,7 +37,7 @@ let parse_tests_for_literals =
       ( "\"xx_xs1\"" )
       ( StringExp { value = "xx_xs1"; loc = dummy_loc; } );
 
-    (* 10進ASCIIコード -> 対応する文字 *)
+    (* 10進ASCIIコードを含む文字列リテラル *)
     test_utility_parser ("\"\\065\"")
       ( "\"\\065\"" )
       ( StringExp { value = "A"; loc = dummy_loc; } );
@@ -48,7 +48,7 @@ let parse_tests_for_literals =
       ( "\"\\126\"" )
       ( StringExp { value = "~"; loc = dummy_loc; } );
 
-    (* 特殊文字 *)
+    (* 特殊文字リテラル *)
     test_utility_parser ("double quote")
       ( "\"\\\"\"" )
       ( StringExp { value = "\""; loc = dummy_loc; } );
@@ -56,14 +56,15 @@ let parse_tests_for_literals =
       ( "\"\\\\\"" )
       ( StringExp { value = "\\"; loc = dummy_loc; } );
 
-    (* 行跨ぎの文字列 *)
+    (* 行跨ぎの文字列リテラル *)
     test_utility_parser "string straddles multiple lines"
       ( "\"ai\\ \n   \\u\\   \t  \\eo\"" )
       ( StringExp { value = "aiueo"; loc = dummy_loc; } );
   ]
 
 let parse_tests_for_binops =
-  "parse test for binops" >::: [
+  "parsing tests for binops" >::: [
+    (* 二項演算 *)
     test_utility_parser ("1 + 1")
       ( "1 + 1" )
       ( BinOpExp { op = Add; e1=lit_int_1; e2=lit_int_1; loc = dummy_loc; } );
@@ -100,6 +101,8 @@ let parse_tests_for_binops =
     test_utility_parser ("1 | 1")
       ( "1 | 1" )
       ( BinOpExp { op = Or;  e1=lit_int_1; e2=lit_int_1; loc = dummy_loc; } );
+
+    (* 演算子の優先順位 *)
     test_utility_parser ("1 + 1 * 1")
       ( "1 + 1 * 1" )
       ( BinOpExp {
@@ -207,7 +210,8 @@ let parse_tests_for_binops =
   ]
 
 let parse_tests_for_unops =
-  "parse test for unops" >::: [
+  "parsing tests for unops" >::: [
+    (* 単項演算 *)
     test_utility_parser ("-0")
       ( "-0" )
       ( BinOpExp {
@@ -215,7 +219,7 @@ let parse_tests_for_unops =
         e1 = lit_int_0;
         e2 = lit_int_0;
         loc = dummy_loc;
-      });
+      } );
     test_utility_parser ("-1")
       ( "-1" )
       ( BinOpExp {
@@ -223,7 +227,7 @@ let parse_tests_for_unops =
         e1 = lit_int_0;
         e2 = lit_int_1;
         loc = dummy_loc;
-      });
+      } );
     test_utility_parser ("-1*-1+-1")
       ( "-1*-1+-1" )
       ( BinOpExp {
@@ -236,11 +240,11 @@ let parse_tests_for_unops =
         };
         e2 = lit_int_minus_1;
         loc = dummy_loc;
-      });
+      } );
   ]
 
 let parse_tests_for_sequencing =
-  "parse tests for sequencing" >::: [
+  "parsing testss for sequencing" >::: [
     test_utility_parser "(nil; nil)"
       ( "(nil; nil)" )
       ( SeqExp [ lit_nil; lit_nil; ] );
@@ -250,7 +254,7 @@ let parse_tests_for_sequencing =
   ]
 
 let parse_tests_for_records =
-  "parse tests for records" >::: [
+  "parsing testss for records" >::: [
     test_utility_parser ("nil")
       ( "nil" )
       ( NilExp { loc = dummy_loc; } );
@@ -279,7 +283,7 @@ let parse_tests_for_records =
   ]
 
 let parse_tests_for_arrays = 
-  "parse tests for arrays" >::: [
+  "parsing testss for arrays" >::: [
     test_utility_parser "intArray[1] of 0"
       ( "intArray[1] of 0" )
       ( ArrayExp {
@@ -297,7 +301,7 @@ let parse_tests_for_arrays =
   ]
 
 let parse_tests_for_assignments =
-  "parse tests for assignments" >::: [
+  "parsing testss for assignments" >::: [
     test_utility_parser "a := 100"
       ( "a := 1" )
       ( AssignExp {
@@ -327,7 +331,7 @@ let parse_tests_for_assignments =
   ]
 
 let parse_tests_for_if_expressions =
-  "parse tests for if expressions" >::: [
+  "parsing testss for if expressions" >::: [
     test_utility_parser "if 1 then 1 else 1"
       ( "if 1 then 1 else 1" )
       ( IfExp {
@@ -371,7 +375,7 @@ let parse_tests_for_if_expressions =
   ]
 
 let parse_tests_for_left_values =
-  "parse tests for left values" >::: [
+  "parsing testss for left values" >::: [
     test_utility_parser "a"
       ( "a" )
       ( VarExp {
@@ -396,7 +400,7 @@ let parse_tests_for_left_values =
   ]
 
 let parse_tests_for_loops = 
-  "parse tests for loops" >::: [
+  "parsing testss for loops" >::: [
     test_utility_parser "break"
       ( "break" )
       ( BreakExp { loc = dummy_loc } );
@@ -489,7 +493,7 @@ let parse_tests_for_loops =
   ]
 
 let parse_tests_for_function_call =
-  "parse tests for function call" >::: [
+  "parsing testss for function call" >::: [
     test_utility_parser "hoge()"
       ( "hoge()" )
       ( CallExp { func = "hoge"; args = []; loc = dummy_loc } );
@@ -527,7 +531,7 @@ let parse_tests_for_function_call =
     ]
 
 let parse_tests_for_let_expressions = 
-  "parse tests for let-exppressions" >::: [
+  "parsing testss for let-expressions" >::: [
     test_utility_parser "let var x = 1 in 1 end"
       ( "let var x := 1 in 1 end" )
       ( LetExp {

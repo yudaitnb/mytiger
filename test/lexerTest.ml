@@ -1,9 +1,8 @@
 open OUnit2
 open Util
 
-let lexing_tests_for_basic_keywords =
-  "lexing tests for basic keywords"
-  >::: [
+let lexing_tests_for_reserved_keywords =
+  "lexing tests for reserved keywords" >::: [
     test_utility_lexer "while"    "while"    WHILE;
     test_utility_lexer "for"      "for"      FOR;
     test_utility_lexer "to"       "to"       TO;
@@ -58,8 +57,7 @@ let lexing_tests_for_basic_keywords =
     ]
 
 let lexing_tests_for_strings =
-  "lexing tests for strings"
-  >::: [
+  "lexing tests for strings" >::: [
     (* 整形文字 *)
     test_utility_lexer "newline" "\"\\n\"" (STR "\n");
     test_utility_lexer "tab" "\"\\t\"" (STR "\t");
@@ -87,7 +85,7 @@ let lexing_tests_for_strings =
   ]
 
 let list_of_lexer_tests = [
-  lexing_tests_for_basic_keywords;
+  lexing_tests_for_reserved_keywords;
   lexing_tests_for_strings
 ]
 

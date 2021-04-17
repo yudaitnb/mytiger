@@ -2,13 +2,14 @@ open Core
 open Printf
 open Util
 
+let path_queens = "./examples/examplesfrombook/testcases/queens.tig"
+let path_merge = "./examples/examplesfrombook/testcases/merge.tig"
+
 (* let () =
   let input = Lexing.from_channel stdin in
   match parse_program input with
   | Error msg -> print_endline msg
   | Ok res    -> printf "   AST: \n%s\n" (Ast.show_exp res) *)
-
-let path_merge = "./examples/examplesfrombook/testcases/queens.tig"
 
 let file_to_string path =
   let fin = open_in path in
@@ -24,7 +25,7 @@ let file_to_string path =
       !buff
 
 let () =
-  let input = file_to_string path_merge in
+  let input = file_to_string path_queens in
   let res = parse_from_string input in
   printf "==== INPUT: ====\n%s\n" input;
   printf "==== AST: ====\n%s\n" (Ast.show_exp res)
