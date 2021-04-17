@@ -299,7 +299,9 @@ and check_dec (((venv : E.venv), (tenv : E.tenv)) as env) dec : (E.venv * E.tenv
       let name = fundec.name in
       let params = fundec.params in
       let result_type = fundec.result_type in
+      let body = fundec.body in
       let loc = fundec.loc in
+      (* 引数リストparamsをsymbolとtyの組のリストに変換 *)
       let symtylist = List.map
         (fun ({ field_name; field_type } : A.field) ->
           let sym_field_name = S.symbol field_name in
@@ -307,14 +309,22 @@ and check_dec (((venv : E.venv), (tenv : E.tenv)) as env) dec : (E.venv * E.tenv
           let t = tylook tenv sym_field_type loc in
           (sym_field_name, t))
         (params) in
+      (* tyだけのリストに変換 *)
       let tylist = List.map
         (fun (_,t) -> t)
         (symtylist) in
+      (* 型検査 *)
+      let t_body = check_exp (venv, tenv, false) body in
       match result_type with
-      | None -> Error.fatal "not implemented"
+      | None -> 
+        let newentry = E.FunEntry { formals = tylist; result = t_body } in
+        let venv'  = S.enter (S.symbol name) newentry venv in
+        let venv'' = venv' (*TODO*) in
+        (venv', venv'')
       | Some resty -> 
         let sym_resty = S.symbol resty in
         let t_resty = tylook tenv sym_resty loc in
+        coerce t_resty t_body loc;
         let newentry = E.FunEntry { formals = tylist; result = t_resty } in
         let venv'  = S.enter (S.symbol name) newentry venv in
         let venv'' = venv' (*TODO*) in
