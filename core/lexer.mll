@@ -3,7 +3,7 @@
   exception Error of string
 
   let n_of_nests = ref 0
-
+  
   let gen_error_message (buf : Lexing.lexbuf) (proc : string) (error : string) =
     let pos = buf.lex_curr_p in
     let lnum = pos.pos_lnum in
@@ -27,6 +27,18 @@
       message
   let gen_error_message_lexer (buf : Lexing.lexbuf) (error : string)
     = gen_error_message buf "Lexer" error
+
+  (* 文字列lexing用の関数 *)
+  let illegal_character loc char =
+    Error.error loc "illegal character '%c'" char
+  let unterminated_string loc =
+    Error.error loc "unterminated string"
+  let illegal_escape loc sequence =
+    Error.error loc "illegal escape sequence: %s" sequence
+  let append_char str ch =
+    str ^ (String.make 1 (Char.chr ch))
+  let str_incr_linenum str lexbuf =
+    String.iter (function '\n' -> Lexing.new_line lexbuf | _ -> ()) str
 }
 
 let space = [' ' '\t' '\n' '\r']
@@ -121,9 +133,7 @@ and token = parse
   | ident as id   { ID id }
 
   (* 文字列 *)
-  | "\"" _* "\"" as str
-    { let s = String.sub str 1 ((String.length str) - 2) in
-      STR(s) }
+  | '"'           { string lexbuf.Lexing.lex_start_p "" lexbuf }
 
   (* EOF *)
   | eof           { EOF }
@@ -133,3 +143,51 @@ and token = parse
     {
       raise (Error (gen_error_message_lexer lexbuf "illegal character"))
     }
+
+and string pos buf = parse
+  (* 閉じダブルクオートに到達したらbufferをSTRでラップして返す *)
+  | '"'                               { lexbuf.Lexing.lex_start_p <- pos;
+                                        STR buf
+                                      }
+
+  (* 行の終りとしてシステムに解釈される文字 *)
+  | "\\n"                             { string pos (buf ^ "\n") lexbuf }
+
+  (* タブ *)
+  | "\\t"                             { string pos (buf ^ "\t") lexbuf }
+
+  (* 全ての適切なcに対応する制御文字c *)
+  | "\\^" (['@' 'A'-'Z'] as x)        { string pos (append_char buf (Char.code x - Char.code '@')) lexbuf }
+  | "\\^" (['a'-'z'] as x)            { string pos (append_char buf (Char.code x - Char.code 'a' + 1)) lexbuf }
+
+  (* ASCIIコードdddを持つ一つの数字 *)
+  | "\\" (digit digit digit as x)     { string pos (append_char buf (int_of_string x)) lexbuf }
+
+  (* ダブルクオート文字 ('"') *)
+  | "\\\""                            { string pos (buf ^ "\"") lexbuf }
+
+  (*
+   * バックスラッシュ文字 ('\')
+   * (ocamlの対応するエスケープシーケンスが'\\'の為,4つ必要)
+   *)
+  | "\\\\"                            { string pos (buf ^ "\\") lexbuf }
+
+  (* 行跨ぎの文字列 *)
+  | "\\" ([' ' '\t' '\n']+ as x) "\\" { str_incr_linenum x lexbuf;
+                                        string pos buf lexbuf
+                                      }
+
+  (* 不正なエスケープシーケンス *)
+  | "\\" _ as x                       { illegal_escape (lexbuf.Lexing.lex_start_p, lexbuf.Lexing.lex_curr_p) x;
+                                        string pos buf lexbuf
+                                      }
+  
+  (*  *)
+  | [^ '\\' '"']+ as x                { str_incr_linenum x lexbuf;
+                                        string pos (buf ^ x) lexbuf
+                                      }
+
+  (* 閉じダブルクオートが無い文字列 *)
+  | eof                               { unterminated_string (pos, lexbuf.Lexing.lex_start_p);
+                                        token lexbuf
+                                      }

@@ -37,10 +37,14 @@ open Ast
 %token EOF
 
 // 演算子の結合順位（結合順位が低い順）
-%nonassoc DO THEN
-%left OF
-%nonassoc ELSE
+%nonassoc DO
 %nonassoc ASSIGN
+%nonassoc OF
+
+// if c1 then if c2 then e1 else e2
+// = if c1 then (if c2 then e1 else e2)
+%nonassoc THEN
+%nonassoc ELSE
 
 %left OR
 %left AND
@@ -49,9 +53,6 @@ open Ast
 %left ASTERISK SLASH
 
 %nonassoc UMINUS
-
-%nonassoc LVALUE
-%left LBRACKET
 
 %start <exp> prog
 
@@ -62,11 +63,19 @@ prog:
   | exp EOF { $1 }
 
 lvalue:
-  | v=ID %prec LVALUE
+  | v=ID
     { SimpleVar { name = v; loc = ($startpos, $endpos) } }
+  | lvalue_not_id
+    { $1 }
+
+lvalue_not_id:
   | v=lvalue DOT f=ID
     { FieldVar { var = v; name = f; loc = ($startpos, $endpos) } }
-  | v=lvalue LBRACKET e=exp RBRACKET
+  | v=ID LBRACKET e=exp RBRACKET
+    { SubscriptVar {
+      var = SimpleVar { name = v; loc = ($startpos, $endpos) };
+      exp = e; loc = ($startpos, $endpos) } }
+  | v=lvalue_not_id LBRACKET e=exp RBRACKET
     { SubscriptVar { var = v; exp = e; loc = ($startpos, $endpos) } }
 
 // 式
@@ -128,19 +137,14 @@ exp:
   | BREAK
     { BreakExp { loc = ($startpos, $endpos) } }
 
-  // let式
-  // let DECS in EXP end
-  | LET decs=list(dec) IN expseq=separated_list(SEMICOLON, exp) END
-    { LetExp { decs=decs; body=(SeqExp expseq); loc = ($startpos, $endpos) } }
-  
-  // 列化
-  // (e1; e2; ... ; en)
-  // 一要素のときは括弧と同じ
-  | LPAREN es=separated_list(SEMICOLON, exp) RPAREN
-    { SeqExp es }
+  // 変数
+  | v=ID
+    { VarExp {
+      var = SimpleVar { name = v; loc = ($startpos, $endpos) };
+      loc = ($startpos, $endpos) } }
 
   // 左辺値(変数含)
-  | lvalue
+  | lvalue_not_id
     { VarExp { var = $1; loc = ($startpos, $endpos)  } }
 
   // 代入式
@@ -151,14 +155,66 @@ exp:
   | func=ID LPAREN args = separated_list(COMMA, exp) RPAREN
     { CallExp { func = func; args = args; loc = ($startpos, $endpos)} }
 
+  // let式
+  // let DECS in EXP end
+  | LET decs=declist IN exp=exp END
+    { LetExp { decs=decs; body=exp; loc = ($startpos, $endpos) } }
+  // EXPが()無しシークエンスになっているプログラムへの対応
+  // let DECS in e1;...;en end
+  | LET decs=declist IN expseq=expseq END
+    { LetExp { decs=decs; body=(SeqExp expseq); loc = ($startpos, $endpos) } }
+
+  // シ－クエンス
+  // (e1; e2; ... ; en)
+  //  - 一要素のときは括弧
+  //  - 二要素以上でシークエンス
+  //  - 終端に余計なセミコロンを許容する (e1; e2;)
+  | LPAREN exp=exp RPAREN
+    { exp }
+  | LPAREN expseq=expseq RPAREN
+    { SeqExp expseq }
+
+// シークエンス
+expseq:
+  | e1=exp SEMICOLON e2=exp           { [e1; e2] }
+  // | e1=exp SEMICOLON e2=exp SEMICOLON { [e1; e2] }
+  | top=exp SEMICOLON rest=expseq     { top :: rest }
+
 // Declarations
-dec :
-  | separated_nonempty_list(AND, tydec)
-    { TypeDec $1 }
-  | separated_nonempty_list(AND, fundec)
-    { FunDec $1 }
-  | vardec
-    { $1 }
+//  - fundecとtydecは隣接する定義は一纏めにする
+declist:
+  | tydecs=nonempty_list(tydec)
+    { [TypeDec tydecs] }
+  | fundecs=nonempty_list(fundec)
+    { [FunDec fundecs] }
+  | vardec=vardec
+    { [vardec] }
+  | top=nonempty_list(tydec) rest=nontydeclist
+    { (TypeDec top) :: rest }
+  | top=nonempty_list(fundec) rest=nonfundeclist
+    { (FunDec top) :: rest }
+  | top=vardec rest=declist
+    { top :: rest }
+
+nontydeclist:
+  | top=nonempty_list(fundec)
+    { [FunDec top] }
+  | top=vardec
+    { [top] }
+  | top=nonempty_list(fundec) rest=nonfundeclist
+    { (FunDec top) :: rest }
+  | top=vardec rest=declist
+    { top :: rest }
+
+nonfundeclist:
+  | top=nonempty_list(tydec)
+    { [TypeDec top] }
+  | top=vardec
+    { [top] }
+  | top=nonempty_list(tydec) rest=nontydeclist
+    { (TypeDec top) :: rest }
+  | top=vardec rest=declist
+    { top :: rest }
 
 // type ID = TY
 tydec:

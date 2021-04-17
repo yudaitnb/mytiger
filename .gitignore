@@ -12,7 +12,7 @@
 _build/
 
 # Example codes from tiger book
-book/
+examples/examplesfrombook/
 
 # ocamlbuild targets
 *.byte
