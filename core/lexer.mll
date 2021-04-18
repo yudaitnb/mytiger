@@ -178,8 +178,8 @@ and string pos buf = parse
                                       }
 
   (* 不正なエスケープシーケンス *)
-  | "\\" _ as x                       { illegal_escape (lexbuf.Lexing.lex_start_p, lexbuf.Lexing.lex_curr_p) x;
-                                        string pos buf lexbuf
+  | "\\" _ as x                       { illegal_escape (lexbuf.Lexing.lex_start_p, lexbuf.Lexing.lex_curr_p) x
+                                        (* ; string pos buf lexbuf *)
                                       }
   
   (*  *)
@@ -188,6 +188,6 @@ and string pos buf = parse
                                       }
 
   (* 閉じダブルクオートが無い文字列 *)
-  | eof                               { unterminated_string (pos, lexbuf.Lexing.lex_start_p);
-                                        token lexbuf
+  | eof                               { unterminated_string (pos, lexbuf.Lexing.lex_start_p)
+                                        (*; token lexbuf *)
                                       }

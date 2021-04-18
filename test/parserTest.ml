@@ -14,46 +14,46 @@ let parse_tests_for_literals =
 
     (* 整形文字リテラル *)
     test_utility_parser ("newline")
-      ( "\"\\n\"" )
+      ( {|"\n"|} )
       ( StringExp { value = "\n"; loc = dummy_loc; } );
     test_utility_parser ("tab")
-      ( "\"\\t\"" )
+      ( {|"\t"|} )
       ( StringExp { value = "\t"; loc = dummy_loc; } );
 
     (* 文字列リテラル *)
     test_utility_parser ("no characters")
-      ( "\"\"" )
+      ( {|""|} )
       ( StringExp { value = ""; loc = dummy_loc; } );
     test_utility_parser ("whitespace")
-      ( "\" \"" )
+      ( {|" "|} )
       ( StringExp { value = " "; loc = dummy_loc; } );
     test_utility_parser ("str1")
-      ( "\"foo\"" )
+      ( {|"foo"|} )
       ( StringExp { value = "foo"; loc = dummy_loc; } );
     test_utility_parser ("str2")
-      ( "\"xx1\"" )
+      ( {|"xx1"|} )
       ( StringExp { value = "xx1"; loc = dummy_loc; } );
     test_utility_parser ("str3")
-      ( "\"xx_xs1\"" )
+      ( {|"xx_xs1"|} )
       ( StringExp { value = "xx_xs1"; loc = dummy_loc; } );
 
     (* 10進ASCIIコードを含む文字列リテラル *)
     test_utility_parser ("\"\\065\"")
-      ( "\"\\065\"" )
+      ( {|"\065"|} )
       ( StringExp { value = "A"; loc = dummy_loc; } );
-    test_utility_parser ("\"\\065\"")
-      ( "\"\\064\"" )
+    test_utility_parser ("\"\\064\"")
+      ( {|"\064"|} )
       ( StringExp { value = "@"; loc = dummy_loc; } );
     test_utility_parser ("\"\\126\"")
-      ( "\"\\126\"" )
+      ( {|"\126"|} )
       ( StringExp { value = "~"; loc = dummy_loc; } );
 
     (* 特殊文字リテラル *)
     test_utility_parser ("double quote")
-      ( "\"\\\"\"" )
+      ( {|"\""|} )
       ( StringExp { value = "\""; loc = dummy_loc; } );
     test_utility_parser ("backslash")
-      ( "\"\\\\\"" )
+      ( {| "\\" |} )
       ( StringExp { value = "\\"; loc = dummy_loc; } );
 
     (* 行跨ぎの文字列リテラル *)
