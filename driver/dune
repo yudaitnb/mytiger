@@ -1,5 +1,5 @@
 (executable
- (public_name mytiger_driver)
+ (public_name driver)
  (name driver)
  (libraries core)
 )
