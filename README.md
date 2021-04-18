@@ -27,7 +27,8 @@ $ dune build
 ## How to run
 
 ```
-$ dune exec mytiger
+$ dune exec mytiger_driver
+$ echo "1+1" | dune exec mytiger
 ```
 
 ## How to test the compiler

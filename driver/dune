@@ -1,0 +1,9 @@
+(executable
+ (public_name mytiger_driver)
+ (name driver)
+ (libraries core)
+)
+
+(env
+ (dev
+  (flags (:standard -warn-error -a))))
