@@ -16,7 +16,7 @@ let gen_error_message (buf : Lexing.lexbuf) (proc : string) (error : string) =
     else (Lexing.lexeme buf)
   in
   let message = Printf.sprintf
-    "line %d, characters %d-%d '%s': %s - %s"
+    "line %d, characters %d-%d: '%s' %s - %s"
     (lnum)          (* 処理に失敗した行番号 *)
     (start)         (* 処理に失敗した文字の開始位置 *)
     (curr)          (* 処理に失敗した文字位置 *)
@@ -26,10 +26,27 @@ let gen_error_message (buf : Lexing.lexbuf) (proc : string) (error : string) =
   in
     message
 
-exception Error of (Location.location * string)
+(* exception Error of (Location.location * string) *)
+exception Error of string
 
-let error loc fmt =
-  Format.ksprintf (fun msg -> raise (Error (loc, msg))) fmt
+let error (loc : Location.location) fmt =
+  (* Format.ksprintf (fun msg -> raise (Error (loc, msg))) fmt *)
+  let (startp, endp) = loc in
+  let lnum = startp.pos_lnum in
+  let start_pos = startp.pos_cnum - startp.pos_bol + 1 in
+  let end_pos_sub = endp.pos_cnum - endp.pos_bol + 1 in
+  let chars = end_pos_sub - start_pos in
+  let end_pos = 
+    if chars = 0
+      then end_pos_sub
+      else end_pos_sub - 1
+  in
+  let posinfo =
+    if chars = 1
+      then Format.sprintf "line %d, character %d: " lnum start_pos
+      else Format.sprintf "line %d, characters %d-%d: " lnum start_pos end_pos
+  in
+  Format.ksprintf (fun msg -> raise (Error (posinfo ^ msg))) fmt
 
 let fatal fmt =
   Format.ksprintf failwith fmt

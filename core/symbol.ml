@@ -71,10 +71,21 @@ type 'a table = 'a Table.t
 (* 型のテーブル *)
 let empty = Table.empty
 
-(* 新しい束縛を追加（古い表を更新せず、新しい表を生成する *)
+(* 新しい束縛を追加 *)
 let enter = Table.add
+
+let map = Table.map
 
 (* 表tableの中で記号keyの束縛bを見つけ、Some(b)を返す(keyの束縛が存在しないならNone) *)
 let look key table =
   try Some (Table.find key table)
   with Not_found -> None
+
+(* symbolリストsymlstの中で記号symが存在するか否か *)
+let rec looklist sym tpllst = 
+  match tpllst with
+  | [] -> None
+  | (s, ty) :: rst -> 
+    if equal_symbol sym s 
+      then Some ty
+      else looklist sym rst

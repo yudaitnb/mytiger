@@ -4,29 +4,16 @@
 
   let n_of_nests = ref 0
   
-  let gen_error_message (buf : Lexing.lexbuf) (proc : string) (error : string) =
-    let pos = buf.lex_curr_p in
-    let lnum = pos.pos_lnum in
-    let start = buf.lex_start_pos in
-    let curr = buf.lex_curr_pos in
-    let last_char =
-      (* 仮の条件式（lexbuf.lex_eof_reachedが機能しない） *)
-      if (start == curr) then
-        "eof"
-      else (Lexing.lexeme buf)
-    in
-    let message = Printf.sprintf
-      "line %d, characters %d-%d '%s': %s - %s"
-      (lnum)          (* 処理に失敗した行番号 *)
-      (start)         (* 処理に失敗した文字の開始位置 *)
-      (curr)          (* 処理に失敗した文字位置 *)
-      (last_char)     (* 処理に失敗した文字 *)
-      (proc)          (* 処理に失敗した処理名 *)
-      (error)         (* 処理の失敗の理由 *)
-    in
-      message
+  let gen_error_message = Error.gen_error_message
   let gen_error_message_lexer (buf : Lexing.lexbuf) (error : string)
     = gen_error_message buf "Lexer" error
+
+  (* let next_line (lexbuf : Lexing.lexbuf)=
+    let pos = lexbuf.lex_curr_p in
+    lexbuf.lex_curr_p <- { pos with 
+      pos_lnum = pos.pos_lnum + 1;
+      pos_bol = lexbuf.lex_curr_pos
+    } *)
 
   (* 文字列lexing用の関数 *)
   let illegal_character loc char =
@@ -41,7 +28,8 @@
     String.iter (function '\n' -> Lexing.new_line lexbuf | _ -> ()) str
 }
 
-let space = [' ' '\t' '\n' '\r']
+let space = [' ' '\t']
+let newline = ['\n' '\r']
 let digit = ['0'-'9']
 let alpha = ['a'-'z' 'A'-'Z']
 let number = digit+
@@ -62,12 +50,16 @@ rule comment = parse
         comment lexbuf }
   | '/' { comment lexbuf }
   | '*' { comment lexbuf }
+  | newline { Lexing.new_line lexbuf; comment lexbuf }
   | [^ '/' '*'] { comment lexbuf }
   | eof { raise (Error (gen_error_message_lexer lexbuf "expected '*/', but not found")) }
 
 and token = parse
   (* スペース *)
   | space+        { token lexbuf }
+
+  (* 改行 *)
+  | newline       { Lexing.new_line lexbuf; token lexbuf }
   
   (* コメント *)
   | "/*"
@@ -99,7 +91,6 @@ and token = parse
   | ":"           { COLON }
   | ";"           { SEMICOLON }
   | "."           { DOT }
-  (* | "@"           { AT } *)
 
   (* 括弧 *)
   | "("           { LPAREN }

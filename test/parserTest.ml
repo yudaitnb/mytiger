@@ -188,8 +188,8 @@ let parse_tests_for_binops =
           e2 = lit_int_1;
           loc = dummy_loc; };
         loc = dummy_loc; } );
-    test_utility_parser ("buffer=\" \" | buffer=\"\\n\"")
-      ( "buffer=\" \" | buffer=\"\\n\"" )
+    test_utility_parser ({| buffer=" " | buffer="\n" |})
+      ( {| buffer=" " | buffer="\n" |} )
       ( BinOpExp {
         op = Or;
         e1 = BinOpExp {

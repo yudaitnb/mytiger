@@ -1,5 +1,5 @@
 open OUnit2
-open Core.Util
+open Core.Driverutil
 open Core.Lexer
 open Core.Ast
 module S = Core.Semantic
@@ -66,11 +66,24 @@ let test_utility_parser name input expected =
  * type checkテストユーティリティ
  * name     : テスト名
  * input    : 入力プログラム(str型の値)
- * expected : 期待される型結果(exp型の値)
+ * expected : 期待される型結果(ty型の値)
  *)
 let test_utility_typechecker name input expected =
   name >::
   (fun _ -> assert_equal ~printer:(T.show_ty) ~cmp:(T.equal_ty)
     (expected)
     (S.typeof (parse_from_string input))
+  )
+
+(* 
+ * type check errorテストユーティリティ
+ * name     : テスト名
+ * input    : 入力プログラム(str型の値)
+ * expected : 期待されるエラー結果(Error of String型の値)
+ *)
+let test_utility_typechecker_error name input expected =
+  name >::
+  (fun _ -> assert_raises
+    (expected)
+    (fun () -> S.typeof (parse_from_string input))
   )

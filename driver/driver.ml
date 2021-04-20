@@ -1,10 +1,9 @@
-open Core
-open Printf
-open Util
-
+open Core.Driverutil
 
 let path_queens = "./examples/examplesfrombook/testcases/queens.tig"
 let path_merge = "./examples/examplesfrombook/testcases/merge.tig"
+
+let input_path = path_merge
 
 let file_to_string path =
   let fin = open_in path in
@@ -20,7 +19,8 @@ let file_to_string path =
       !buff
 
 let () =
-  let input = file_to_string path_queens in
-  let res = parse_from_string input in
-  printf "==== INPUT: ====\n%s\n" input;
-  printf "==== AST: ====\n%s\n" (Ast.show_exp res)
+  let inchan = open_in input_path in
+  let res_parser = parse_program (Lexing.from_channel inchan) in
+  let res_typechecker = type_from_ast res_parser in
+  print_ast res_parser;
+  print_type res_typechecker;

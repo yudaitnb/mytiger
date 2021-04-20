@@ -50,13 +50,25 @@ type ty =
   | NAME of Symbol.symbol * ty option ref
 [@@deriving show, eq]
 
-(* NAME型の参照する型を検索する *)
+let makefstlist tpllist = List.map fst tpllist
+
+let makesndlist tpllist = List.map snd tpllist
+
+(*
+ * すべてのNAMEをスキップする関数
+ * expから返される型は名前からそれを構成する既定の型まで辿れる型でなければならない
+ * - 値環境中の各Entryに含まれる型はNAME型でもよい
+ * - レコード型や配列型は要素を記述するためにNAME型を含んでいてもよい
+ *)
 let rec actual_ty = function
   | NAME (_,{contents=Some t}) -> actual_ty t
+  | RECORD (symtylst, un)      -> let newsymtylst = List.map (fun (sym,ty) -> (sym, actual_ty ty)) symtylst
+                                  in RECORD (newsymtylst, un)
+  | ARRAY (ty, un)             -> ARRAY (actual_ty ty, un)
   | t                          -> t
 
 (* a, bが等しい型か検査する *)
-  let rec coerceable a b =
+let rec coerceable a b =
   match a,b with
   | NAME (_,{contents=Some t}), b                          -> coerceable t b
   | a                         , NAME (_,{contents=Some t}) -> coerceable a t
@@ -65,10 +77,21 @@ let rec actual_ty = function
   | STRING                    , STRING                     -> true
   | NIL                       , NIL                        -> true
   | NIL                       , RECORD _                   -> true
+  | RECORD _                  , NIL                        -> true
   | RECORD (_,uniqa)          , RECORD (_,uniqb)           -> uniqa = uniqb
   | ARRAY (_,uniqa)           , ARRAY (_,uniqb)            -> uniqa = uniqb
   | _                                                      -> false
 
+(* tyが比較可能な型か検査する *)
+let rec comparable ty =
+  match ty with
+  | NAME (_,{contents=Some t}) -> comparable t
+  | INT                        -> true
+  | STRING                     -> true
+  | NIL                        -> true 
+  | RECORD _                   -> true
+  | ARRAY _                    -> true
+  | _                          -> false
 
 let name = Symbol.name
 let map = List.map
